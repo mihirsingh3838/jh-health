@@ -195,7 +195,7 @@ Example: `JH-2412-00001` → December 2024, ticket #1
 - Root Directory: `backend`
 - Build: `npm install`
 - Start: `npm start`
-- Env: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (frontend URL), `SMTP_*` (optional)
+- Env: `MONGO_URI`, `JWT_SECRET`, `NODE_ENV=production`, `CLIENT_URL` (frontend URL, e.g. `https://jharkhand-wifi-complain.onrender.com`), `SMTP_*` (optional)
 
 **Frontend (Static Site):**
 - New → Static Site → Connect repo
@@ -204,7 +204,7 @@ Example: `JH-2412-00001` → December 2024, ticket #1
 - Publish: `build`
 - **Required Env:** `REACT_APP_API_URL` = backend URL (e.g. `https://your-api.onrender.com`) — without this, facility dropdowns and API calls will fail in production.
 
-Set `CLIENT_URL` on backend to your frontend URL (e.g. `https://your-app.onrender.com`).
+Set `CLIENT_URL` on backend to your frontend URL (e.g. `https://jharkhand-wifi-complain.onrender.com`). If not set in production, the backend allows `*.onrender.com` origins by default.
 
 ---
 

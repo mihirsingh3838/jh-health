@@ -11,10 +11,17 @@ const app = express();
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',').map(o => o.trim()).filter(Boolean)
   : ['http://localhost:3000'];
+
+// In production, if CLIENT_URL not set, allow *.onrender.com origins (common when deploying to Render)
+const isProduction = process.env.NODE_ENV === 'production';
+const allowRenderOrigins = isProduction && !process.env.CLIENT_URL;
+
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) cb(null, true);
-    else cb(null, false);
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    if (allowRenderOrigins && origin.endsWith('.onrender.com')) return cb(null, true);
+    cb(null, false);
   },
   credentials: true
 }));
