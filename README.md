@@ -202,7 +202,7 @@ Example: `JH-2412-00001` → December 2024, ticket #1
 - Root Directory: `frontend`
 - Build: `npm install && npm run build`
 - Publish: `build`
-- Env: `REACT_APP_API_URL` = backend URL (e.g. `https://your-api.onrender.com`)
+- **Required Env:** `REACT_APP_API_URL` = backend URL (e.g. `https://your-api.onrender.com`) — without this, facility dropdowns and API calls will fail in production.
 
 Set `CLIENT_URL` on backend to your frontend URL (e.g. `https://your-app.onrender.com`).
 

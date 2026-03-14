@@ -44,22 +44,40 @@ export default function Home() {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(null);
+  const [facilityError, setFacilityError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => { getDistricts().then(r => setDistricts(r.data)); }, []);
+  useEffect(() => {
+    setFacilityError('');
+    getDistricts()
+      .then(r => setDistricts(r.data || []))
+      .catch(err => {
+        console.error('Failed to load districts:', err);
+        setFacilityError('Unable to load facilities. Please check your connection and try again.');
+      });
+  }, []);
   useEffect(() => {
     if (form.district) {
-      getFacilityTypes(form.district).then(r => setFacilityTypes(r.data));
+      setFacilityError('');
+      getFacilityTypes(form.district)
+        .then(r => setFacilityTypes(r.data || []))
+        .catch(() => setFacilityTypes([]));
       setForm(f => ({ ...f, facilityType: '', facilityCode: '', facilityName: '' }));
       setFacilities([]);
+    } else {
+      setFacilityTypes([]);
     }
   }, [form.district]);
   useEffect(() => {
     if (form.district && form.facilityType) {
-      getFacilities(form.district, form.facilityType).then(r => setFacilities(r.data));
+      getFacilities(form.district, form.facilityType)
+        .then(r => setFacilities(r.data || []))
+        .catch(() => setFacilities([]));
       setForm(f => ({ ...f, facilityCode: '', facilityName: '' }));
+    } else {
+      setFacilities([]);
     }
-  }, [form.facilityType]);
+  }, [form.district, form.facilityType]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -180,6 +198,7 @@ export default function Home() {
             {step === 1 && (
               <div>
                 <h3 className="mb-3">Select Health Facility</h3>
+                {facilityError && <div className="alert alert-error mb-3">{facilityError}</div>}
                 <div className="form-group">
                   <label className="form-label">District <span className="req">*</span></label>
                   <select className="form-control" value={form.district} onChange={e => set('district', e.target.value)}>
