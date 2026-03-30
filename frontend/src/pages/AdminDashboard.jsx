@@ -398,6 +398,16 @@ export default function AdminDashboard() {
             </div>
             <div className="modal-body">
               <p className="text-sm text-muted mb-2">Ticket: <strong>{selectedComplaint?.ticketId}</strong></p>
+              {selectedComplaint?.attachmentUrls?.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-xs text-muted font-semibold mb-1">Attachments</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {selectedComplaint.attachmentUrls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--gray-200)' }} /></a>
+                    ))}
+                  </div>
+                </div>
+              )}
               {statusAwaitingOtp ? (
                 <>
                   <div className="alert alert-info mb-3">

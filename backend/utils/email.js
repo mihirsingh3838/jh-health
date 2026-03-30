@@ -48,4 +48,34 @@ async function sendOTPEmail(to, otp, ticketId, userName) {
   }
 }
 
-module.exports = { sendOTPEmail };
+async function sendRegistrationOTPEmail(to, otp) {
+  const transporter = getTransporter();
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@jhhealthwifi.gov.in';
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+      <h2 style="color: #0F4C81;">JH Health WiFi Complaint Portal</h2>
+      <p>Your <strong>6-digit OTP</strong> to verify your email for complaint registration:</p>
+      <div style="background: #f0f4f8; padding: 16px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; margin: 20px 0;">
+        ${otp}
+      </div>
+      <p style="color: #666; font-size: 12px;">This OTP is valid for 15 minutes. Do not share it with anyone.</p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+      <p style="color: #999; font-size: 11px;">Jharkhand Health Department · NIC</p>
+    </div>
+  `;
+
+  if (transporter) {
+    await transporter.sendMail({
+      from,
+      to,
+      subject: 'Verify your email - JH Health WiFi Complaint Portal',
+      html
+    });
+  } else {
+    console.log('\n📧 [Email not configured] Registration OTP would be sent to:', to);
+    console.log('   OTP:', otp, '| Valid 15 min\n');
+  }
+}
+
+module.exports = { sendOTPEmail, sendRegistrationOTPEmail };

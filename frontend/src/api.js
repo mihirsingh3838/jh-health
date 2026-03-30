@@ -38,7 +38,15 @@ export const getFacilities = (district, type) => API.get(`/facilities?district=$
 export const seedFacilities = (facilities) => API.post('/facilities/seed', { facilities });
 
 // Complaints (public)
+export const sendEmailOTP = (email) => API.post('/complaints/send-email-otp', { email });
+export const verifyEmailOTP = (email, otp) => API.post('/complaints/verify-email-otp', { email, otp });
 export const submitComplaint = (data) => API.post('/complaints', data);
+export const uploadComplaintImages = (files) => {
+  const formData = new FormData();
+  files.forEach((f) => formData.append('images', f));
+  return API.post('/upload', formData);
+};
+export const trackComplaintsByContact = (params) => API.get('/complaints/track', { params });
 export const trackComplaint = (ticketId) => API.get(`/complaints/track/${ticketId}`);
 
 // Complaints (protected)

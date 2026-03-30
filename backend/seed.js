@@ -2,9 +2,14 @@
  * Seed script - run once to create admin user and seed facilities
  * Usage: node seed.js
  */
+const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-dotenv.config();
+
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/complaint-portal';
+console.log('Connecting to:', MONGO_URI);
 
 const User = require('./models/User');
 const Facility = require('./models/Facility');
@@ -6025,7 +6030,7 @@ const facilities = [
 ];
 
 async function seed() {
-  await mongoose.connect(process.env.MONGO_URI);
+  await mongoose.connect(MONGO_URI);
   console.log('Connected to MongoDB');
 
   // Create default admin
@@ -6057,24 +6062,9 @@ async function seed() {
 
   // Seed facilities
   if (facilities.length > 0) {
-    // Normalize field names (handles "Lat " with space)
-    const normalized = facilities.map(f => ({
-      sno: f.sno,
-      district: f.district,
-      facility_name: f.facility_name,
-      facility_type: f.facility_type,
-      lat: f['Lat '] ?? f.lat,
-      longitude: f.longitude,
-      facility_code: f.facility_code
-    }));
-
-    // Deduplicate by facility_code (keep first occurrence)
-    const uniqueFacilities = [...new Map(normalized.map(f => [f.facility_code, f])).values()];
-
     await Facility.deleteMany({});
-    await Facility.insertMany(uniqueFacilities);
-    const skipped = facilities.length - uniqueFacilities.length;
-    console.log(`✅ ${uniqueFacilities.length} facilities seeded${skipped > 0 ? ` (${skipped} duplicates skipped)` : ''}`);
+    await Facility.insertMany(facilities);
+    console.log(`✅ ${facilities.length} facilities seeded`);
   }
 
   await mongoose.disconnect();

@@ -172,6 +172,16 @@ export default function EngineerDashboard() {
               <div style={{ padding: '12px', background: 'var(--gray-50)', borderRadius: 8, marginBottom: 16, fontSize: '0.875rem' }}>
                 <strong>{selected.facilityName}</strong><br />
                 <span className="text-muted">{selected.issueCategory}</span>
+                {selected.issueDescription && <div className="text-xs text-muted mt-1">{selected.issueDescription}</div>}
+                {(selected.attachmentUrls || []).length > 0 && (
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                    {(selected.attachmentUrls || []).map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer" title="View attachment">
+                        <img src={url} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--gray-200)' }} />
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
               {awaitingOtp ? (
                 <>

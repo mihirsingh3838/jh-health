@@ -29,6 +29,7 @@ const complaintSchema = new mongoose.Schema({
     ]
   },
   issueDescription: { type: String, trim: true },
+  attachmentUrls: [{ type: String }], // Optional images (screenshots, etc.) - max 2
 
   // Ticket management
   ticketId: { type: String, unique: true },
