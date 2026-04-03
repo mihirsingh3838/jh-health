@@ -70,18 +70,21 @@ export default function EngineerDashboard() {
   return (
     <div className="page-wrapper">
       <nav className="navbar">
-        <div className="navbar-inner">
-          <div className="navbar-brand">
-            <div className="navbar-logo"><span style={{ fontSize: 18 }}>📶</span></div>
-            <div>
-              <span className="navbar-title">Engineer Panel</span>
-              <span className="navbar-subtitle">JH Health WiFi · My Assigned Tickets</span>
-            </div>
+        <div className="navbar-inner navbar-inner-split">
+          <div className="navbar-logo-slot navbar-logo-slot--left">
+            <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img" />
           </div>
-          <div className="navbar-actions">
-            <span className="navbar-user">{user?.name}</span>
-            <span className="navbar-role" style={{ background: 'var(--accent)' }}>Engineer</span>
-            <button className="btn btn-ghost btn-sm" onClick={() => { logoutUser(); navigate('/login'); }} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Logout</button>
+          <div className="navbar-brand-center">
+            <span className="navbar-title">डिजिटल स्वास्थ्य सेतु</span>
+            <span className="navbar-subtitle">स्वास्थ्य और संचार, हर कदम आपके साथ</span>
+          </div>
+          <div className="navbar-logo-slot navbar-logo-slot--right">
+            <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
+            <div className="navbar-actions navbar-actions--compact">
+              <span className="navbar-user navbar-user--compact">{user?.name}</span>
+              <span className="navbar-role navbar-role--compact" style={{ background: 'var(--accent)' }}>Engineer</span>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => { logoutUser(); navigate('/login'); }} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Logout</button>
+            </div>
           </div>
         </div>
       </nav>

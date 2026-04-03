@@ -77,14 +77,53 @@ h4 { font-size: 1.05rem; }
   justify-content: space-between;
   height: 64px;
 }
+.navbar-inner-split {
+  display: grid;
+  grid-template-columns: minmax(44px, auto) 1fr minmax(44px, auto);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.navbar-logo-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.navbar-logo-slot--left { justify-content: flex-start; }
+.navbar-logo-slot--right { justify-content: flex-end; flex-wrap: wrap; }
+.navbar-admin-left { display: flex; align-items: center; gap: 8px; }
+.navbar-brand-center {
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  justify-self: center;
+  min-width: 0;
+  padding: 0 6px;
+}
 .navbar-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-.navbar-logo { width: 36px; height: 36px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-.navbar-logo svg { width: 22px; height: 22px; color: var(--primary); }
-.navbar-title { color: white; font-weight: 700; font-size: 1.05rem; }
-.navbar-subtitle { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-weight: 400; display: block; margin-top: -2px; }
+.navbar-logo-group { display: flex; align-items: center; gap: 8px; }
+.navbar-logo-img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px; flex-shrink: 0; }
+.navbar-title { color: white; font-weight: 700; font-size: clamp(0.88rem, 2.5vw, 1.05rem); line-height: 1.25; display: block; }
+.navbar-subtitle { color: rgba(255,255,255,0.78); font-size: clamp(0.62rem, 2vw, 0.72rem); font-weight: 400; display: block; margin-top: 2px; line-height: 1.25; }
 .navbar-actions { display: flex; align-items: center; gap: 12px; }
+.navbar-actions--compact { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .navbar-user { color: rgba(255,255,255,0.9); font-size: 0.85rem; }
+.navbar-user--compact { font-size: 0.72rem; max-width: 96px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .navbar-role { background: var(--accent); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.navbar-role--compact { padding: 2px 6px; font-size: 0.65rem; }
+
+.public-footer {
+  padding: 14px 16px 20px;
+  text-align: center;
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+.public-footer-link {
+  font-size: 0.72rem;
+  color: var(--gray-500);
+  text-decoration: none;
+}
+.public-footer-link:hover { color: var(--gray-700); text-decoration: underline; }
 
 /* BUTTONS */
 .btn {
@@ -376,6 +415,14 @@ tbody tr:last-child td { border-bottom: none; }
 }
 .hero-content { position: relative; max-width: 700px; margin: 0 auto; }
 .hero-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 5px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; }
+.hero-badge--hindi { text-transform: none; letter-spacing: 0.02em; font-size: clamp(0.85rem, 2.8vw, 1rem); font-weight: 700; }
+.hero-tagline-hindi {
+  color: rgba(255,255,255,0.92);
+  font-size: clamp(0.95rem, 2.8vw, 1.15rem);
+  font-weight: 500;
+  margin: -8px 0 16px;
+  line-height: 1.45;
+}
 .hero h1 { color: white; margin-bottom: 12px; }
 .hero p { color: rgba(255,255,255,0.8); font-size: 1.05rem; }
 
@@ -392,6 +439,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 /* RESPONSIVE - Mobile */
 @media (max-width: 768px) {
+  .navbar-inner-split { grid-template-columns: auto 1fr auto; gap: 6px; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .sidebar { display: none; }
   .hamburger-btn { display: flex; }
@@ -403,8 +451,7 @@ tbody tr:last-child td { border-bottom: none; }
   .navbar-inner { height: 56px; gap: 8px; }
   .navbar-subtitle { display: none; }
   .navbar-title { font-size: 0.9rem; }
-  .navbar-logo { width: 32px; height: 32px; }
-  .navbar-logo svg { width: 18px; height: 18px; }
+  .navbar-logo-img { width: 30px; height: 30px; }
   .navbar-user { font-size: 0.75rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navbar-role { font-size: 0.65rem; padding: 2px 8px; }
   .navbar-actions { gap: 8px; }

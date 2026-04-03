@@ -62,11 +62,6 @@ export default function Login() {
           <Link to="/" style={{ fontSize: '0.85rem', color: 'var(--gray-500)' }}>← Back to complaint form</Link>
         </div>
 
-        <div className="mt-3" style={{ padding: '14px', background: 'var(--gray-50)', borderRadius: 8, fontSize: '0.75rem', color: 'var(--gray-500)' }}>
-          <strong>Demo Credentials</strong><br />
-          Admin: admin@jhhealthwifi.gov.in / Admin@1234<br />
-          Engineer: engineer1@jhhealthwifi.gov.in / Eng@1234
-        </div>
       </div>
     </div>
   );

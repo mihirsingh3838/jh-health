@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getDistricts, getFacilityTypes, getFacilities, sendEmailOTP, verifyEmailOTP, submitComplaint, uploadComplaintImages } from '../api';
 import Navbar from '../components/Navbar';
+import PublicFooter from '../components/PublicFooter';
 import { useNavigate } from 'react-router-dom';
 
 const ISSUES = [
@@ -234,6 +235,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <PublicFooter />
       </div>
     );
   }
@@ -243,7 +245,6 @@ export default function Home() {
       <Navbar />
       <div className="hero">
         <div className="hero-content">
-          <div className="hero-badge">Jharkhand Health WiFi</div>
           <h1>Report a WiFi Issue</h1>
           <p>Experiencing connectivity issues at your health facility? Register a complaint and our team will resolve it promptly.</p>
         </div>
@@ -458,6 +459,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <PublicFooter />
     </div>
   );
 }

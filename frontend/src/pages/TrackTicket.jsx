@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { trackComplaintsByContact } from '../api';
 import Navbar from '../components/Navbar';
+import PublicFooter from '../components/PublicFooter';
 import StatusBadge from '../components/StatusBadge';
 
 export default function TrackTicket() {
@@ -201,6 +202,7 @@ export default function TrackTicket() {
           )}
         </div>
       </div>
+      <PublicFooter />
     </div>
   );
 }

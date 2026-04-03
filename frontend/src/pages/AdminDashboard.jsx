@@ -115,21 +115,22 @@ export default function AdminDashboard() {
     <div className="page-wrapper">
       {/* Navbar */}
       <nav className="navbar">
-        <div className="navbar-inner">
-          <div className="flex items-center gap-2">
-            <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu">☰</button>
-            <div className="navbar-brand" style={{ margin: 0 }}>
-            <div className="navbar-logo"><span style={{ fontSize: '18px' }}>📶</span></div>
-            <div>
-              <span className="navbar-title">Admin Panel</span>
-              <span className="navbar-subtitle">JH Health WiFi · Complaint Management</span>
+        <div className="navbar-inner navbar-inner-split">
+          <div className="navbar-logo-slot navbar-logo-slot--left navbar-admin-left">
+            <button type="button" className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu">☰</button>
+            <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img" />
+          </div>
+          <div className="navbar-brand-center">
+            <span className="navbar-title">डिजिटल स्वास्थ्य सेतु</span>
+            <span className="navbar-subtitle">स्वास्थ्य और संचार, हर कदम आपके साथ</span>
+          </div>
+          <div className="navbar-logo-slot navbar-logo-slot--right">
+            <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
+            <div className="navbar-actions navbar-actions--compact">
+              <span className="navbar-user navbar-user--compact">{user?.name}</span>
+              <span className="navbar-role navbar-role--compact">Admin</span>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => { logoutUser(); navigate('/login'); }} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Logout</button>
             </div>
-          </div>
-          </div>
-          <div className="navbar-actions">
-            <span className="navbar-user">{user?.name}</span>
-            <span className="navbar-role">Admin</span>
-            <button className="btn btn-ghost btn-sm" onClick={() => { logoutUser(); navigate('/login'); }} style={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Logout</button>
           </div>
         </div>
       </nav>
