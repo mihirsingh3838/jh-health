@@ -12,21 +12,18 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="navbar-inner navbar-inner-split">
-        <div className="navbar-logo-slot navbar-logo-slot--left">
-          <Link to="/" className="navbar-logo-link" aria-label="Home — Digital Swasthya Setu">
-            <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
-          </Link>
-        </div>
-
-        <Link to="/" className="navbar-brand-center">
-          <span className="navbar-title">डिजिटल स्वास्थ्य सेतु</span>
-          <span className="navbar-subtitle">स्वास्थ्य और संचार, हर कदम आपके साथ</span>
+      <div className="navbar-inner">
+        <Link to="/" className="navbar-brand-cluster" aria-label="Home — Digital Swasthya Setu">
+          <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
+          <div className="navbar-text-stack">
+            <span className="navbar-title">डिजिटल स्वास्थ्य सेतु</span>
+            <span className="navbar-subtitle">स्वास्थ्य और संचार, हर कदम आपके साथ</span>
+          </div>
         </Link>
 
-        <div className="navbar-logo-slot navbar-logo-slot--right">
+        <div className="navbar-trail">
           <Link to="/" className="navbar-logo-link" aria-label="Home — Digital Swasthya Setu">
-            <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img" />
+            <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img navbar-logo-img--trail" />
           </Link>
           {user && (
             <div className="navbar-actions navbar-actions--compact">

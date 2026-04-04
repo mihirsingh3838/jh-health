@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -27,6 +27,7 @@
   --gray-800: #1E293B;
   --gray-900: #0F172A;
   --font: 'Sora', sans-serif;
+  --font-hindi: 'Noto Sans Devanagari', 'Sora', system-ui, sans-serif;
   --mono: 'JetBrains Mono', monospace;
   --radius: 12px;
   --radius-sm: 8px;
@@ -116,11 +117,64 @@ h4 { font-size: 1.05rem; }
   min-width: 0;
   padding: 0 6px;
 }
+/* Public nav: BSNL + title stack on the left, ABDM on the right */
+.navbar-brand-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px 12px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  flex: 1;
+}
+.navbar .navbar-title,
+.navbar .navbar-subtitle {
+  font-family: var(--font-hindi);
+  font-feature-settings: 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+}
+.navbar-text-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 0;
+}
+.navbar-trail {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+/* Circular crop for trail logo (ABDM) */
+.navbar-logo-img--trail {
+  border-radius: 50%;
+}
 .navbar-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .navbar-logo-group { display: flex; align-items: center; gap: 8px; }
 .navbar-logo-img { width: 64px; height: 64px; object-fit: contain; border-radius: 10px; background: #fff; padding: 4px; flex-shrink: 0; }
 .navbar-title { color: white; font-weight: 700; font-size: clamp(1rem, 3.2vw, 1.35rem); line-height: 1.2; display: block; }
-.navbar-subtitle { color: rgba(255,255,255,0.88); font-size: clamp(0.75rem, 2.4vw, 0.95rem); font-weight: 500; display: block; margin-top: 6px; line-height: 1.35; max-width: min(40ch, 92vw); margin-left: auto; margin-right: auto; }
+.navbar-subtitle {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(0.75rem, 2.4vw, 0.95rem);
+  font-weight: 500;
+  display: block;
+  margin-top: 6px;
+  line-height: 1.35;
+}
+.navbar-brand-center .navbar-subtitle {
+  max-width: min(40ch, 92vw);
+  margin-left: auto;
+  margin-right: auto;
+}
+.navbar-brand-cluster .navbar-subtitle {
+  margin-top: 2px;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: 100%;
+}
 .navbar-actions { display: flex; align-items: center; gap: 12px; }
 .navbar-actions--compact { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .navbar-user { color: rgba(255,255,255,0.9); font-size: 0.85rem; }
@@ -873,7 +927,7 @@ tbody tr:last-child td { border-bottom: none; }
     min-width: 0;
     overflow: hidden;
   }
-  .navbar-subtitle {
+  .navbar-brand-center .navbar-subtitle {
     display: block;
     white-space: nowrap;
     margin-top: 4px;
@@ -882,6 +936,35 @@ tbody tr:last-child td { border-bottom: none; }
     font-size: clamp(0.52rem, 2.35vw, 0.76rem);
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  /* Public navbar: left-aligned cluster, larger type (reference mobile) */
+  .navbar-brand-cluster {
+    gap: 8px 10px;
+    align-items: center;
+  }
+  .navbar-brand-cluster .navbar-title {
+    font-size: clamp(1.14rem, 4.9vw, 1.36rem);
+    line-height: 1.18;
+    text-align: left;
+  }
+  .navbar-brand-cluster .navbar-text-stack {
+    min-width: 0;
+    overflow: hidden;
+    flex: 1;
+  }
+  .navbar-brand-cluster .navbar-subtitle {
+    white-space: nowrap;
+    margin-top: 2px;
+    font-size: clamp(0.56rem, 2.35vw, 0.74rem);
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .navbar-logo-img--trail {
+    width: 50px;
+    height: 50px;
+    padding: 3px;
   }
   .navbar-logo-img { width: 54px; height: 54px; padding: 3px; }
   .navbar-user { font-size: 0.75rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
