@@ -325,6 +325,322 @@ tbody tr:last-child td { border-bottom: none; }
 .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
 .main-content { flex: 1; padding: 32px; overflow-x: hidden; }
 
+/* HOME — REPORT FLOW (senior mockup) */
+.home-public-bg {
+  flex: 1;
+  background: var(--gray-100);
+  padding-bottom: 24px;
+}
+.report-cta-card {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  padding: 0 16px;
+  padding-top: 20px;
+}
+.report-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: linear-gradient(145deg, #e8f1fb 0%, #ffffff 45%, #f8fafc 100%);
+  border-radius: var(--radius-lg);
+  padding: 22px 22px 22px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+.report-cta-copy { flex: 1; min-width: 0; text-align: left; }
+.report-cta-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.report-cta-title {
+  font-size: clamp(1.15rem, 4vw, 1.45rem);
+  font-weight: 700;
+  color: var(--gray-800);
+  margin: 0;
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
+}
+/* Inline badge hidden on desktop; .report-cta-art base must not set display (would override --inline none). */
+.report-cta-art--inline {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+.report-cta-art--side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.report-cta-desc {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  line-height: 1.5;
+  margin-bottom: 18px;
+  max-width: 320px;
+}
+.report-cta-buttons { display: flex; flex-direction: column; gap: 10px; max-width: 280px; }
+.btn-report-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  background: var(--primary);
+  color: white;
+  transition: all var(--transition);
+}
+.btn-report-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.report-cta-art-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #e8eef4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.report-cta-wifi-logo {
+  width: 72%;
+  height: 72%;
+  max-width: 88px;
+  max-height: 88px;
+  object-fit: contain;
+}
+.btn-report-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  transition: all var(--transition);
+}
+.btn-report-secondary:hover { background: var(--gray-50); }
+.report-cta-art {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+}
+
+@media (max-width: 768px) {
+  .report-cta-inner { flex-direction: column; align-items: stretch; padding: 20px; }
+  /* One alignment for the whole block: title, body, buttons all left — reads cleaner than mixed center/left */
+  .report-cta-copy { text-align: left; }
+  .report-cta-heading-row {
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 14px;
+  }
+  .report-cta-title {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    font-size: clamp(1.05rem, 4.2vw, 1.28rem);
+    line-height: 1.2;
+  }
+  .report-cta-art--inline {
+    display: flex;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+  .report-cta-art--inline .report-cta-art-circle {
+    width: 64px;
+    height: 64px;
+  }
+  .report-cta-art--inline .report-cta-wifi-logo {
+    max-width: 46px;
+    max-height: 46px;
+  }
+  .report-cta-art--side {
+    display: none !important;
+  }
+  .report-cta-desc {
+    text-align: left;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    margin-bottom: 16px;
+  }
+  .report-cta-buttons {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* Step progress bar (mockup) */
+.step-progress-shell {
+  max-width: 720px;
+  margin: 0 auto 16px;
+  padding: 0 16px;
+}
+.step-progress-meta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-bottom: 12px;
+}
+.step-progress-meta strong { color: var(--primary); }
+.step-progress-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: white;
+  border-radius: var(--radius);
+  padding: 14px 12px 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  gap: 4px;
+}
+.step-progress-node {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  min-width: 0;
+}
+.step-progress-connector {
+  flex: 1;
+  height: 3px;
+  background: var(--gray-200);
+  align-self: flex-start;
+  margin-top: 11px;
+  min-width: 8px;
+}
+.step-progress-connector.done { background: var(--primary); }
+.step-progress-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  border: 3px solid white;
+  box-shadow: 0 0 0 1px var(--gray-200);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.step-progress-node.done .step-progress-dot {
+  background: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.step-progress-node.active .step-progress-dot {
+  background: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 76, 129, 0.25);
+}
+.step-progress-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  margin-top: 8px;
+  line-height: 1.2;
+}
+.step-progress-node.active .step-progress-label { color: var(--primary); }
+.step-progress-node.done .step-progress-label { color: var(--gray-700); }
+
+.complaint-form-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+.complaint-form-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+.complaint-form-card .card-body { padding: 22px 20px 20px; }
+.complaint-step-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 18px;
+}
+.form-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 8px;
+}
+.form-label-row .label-icon { font-size: 1rem; line-height: 1; }
+.field-select-wrap {
+  position: relative;
+}
+.field-select-wrap .form-control {
+  padding-left: 40px;
+  appearance: auto;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  border-color: var(--gray-300);
+}
+.field-select-wrap__icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 1;
+}
+.complaint-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gray-100);
+}
+.complaint-footer-actions .complaint-back-btn { flex: 0 0 auto; }
+.complaint-footer-actions .complaint-primary-action {
+  flex: 1;
+  min-width: 160px;
+  justify-content: center;
+  padding: 14px 20px;
+  font-size: 1rem;
+}
+@media (max-width: 480px) {
+  .complaint-footer-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .complaint-footer-actions .complaint-primary-action {
+    width: 100%;
+    min-width: 0;
+  }
+  .complaint-footer-actions .complaint-back-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* COMPLAINT STEP FORM */
 .steps-indicator { display: flex; align-items: center; margin-bottom: 32px; }
 .step-item { display: flex; align-items: center; flex: 1; }

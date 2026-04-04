@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { getDistricts, getFacilityTypes, getFacilities, sendEmailOTP, verifyEmailOTP, submitComplaint, uploadComplaintImages } from '../api';
 import Navbar from '../components/Navbar';
 import PublicFooter from '../components/PublicFooter';
@@ -16,29 +16,54 @@ const ISSUES = [
   { id: 'Other', icon: '💬', title: 'Other Issue', desc: 'Something else not listed above' },
 ];
 
-const STEPS = ['Facility', 'Your Details', 'Issue', 'Confirm'];
+const STEP_LABELS = ['Facility', 'Details', 'Issue', 'Confirm'];
+
+function ReportWifiBadge({ variant }) {
+  return (
+    <div className={`report-cta-art report-cta-art--${variant}`} aria-hidden>
+      <div className="report-cta-art-circle">
+        <img
+          src="/icons/wifi-report.png"
+          alt=""
+          className="report-cta-wifi-logo"
+          decoding="async"
+        />
+      </div>
+    </div>
+  );
+}
 
 function StepIndicator({ current }) {
   return (
-    <div className="steps-indicator">
-      {STEPS.map((label, i) => (
-        <div key={i} className="step-item">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div className={`step-circle ${i < current ? 'done' : i === current ? 'active' : 'pending'}`}>
-              {i < current ? '✓' : i + 1}
+    <div className="step-progress-shell">
+      <p className="step-progress-meta">
+        Step <strong>{current + 1}</strong> of 4 · <strong>{STEP_LABELS[current]}</strong>
+      </p>
+      <div className="step-progress-track">
+        {STEP_LABELS.map((label, i) => (
+          <Fragment key={label}>
+            {i > 0 && (
+              <div
+                className={`step-progress-connector ${current >= i ? 'done' : ''}`}
+                role="presentation"
+              />
+            )}
+            <div
+              className={`step-progress-node ${i < current ? 'done' : ''} ${i === current ? 'active' : ''}`}
+            >
+              <span className="step-progress-dot" />
+              <span className="step-progress-label">{label}</span>
             </div>
-            <span className="step-label">{label}</span>
-          </div>
-          {i < STEPS.length - 1 && <div className={`step-line ${i < current ? 'done' : ''}`} />}
-        </div>
-      ))}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 }
 
 export default function Home() {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ userName: '', mobile: '', email: '', district: '', facilityType: '', facilityCode: '', facilityName: '', issueCategory: '', issueDescription: '' });
+  const [form, setForm] = useState({ userName: '', mobile: '', email: '', district: '', facilityType: '', facilityCode: '', facilityName: '', issueCategory: '', issueDescription: '', attachmentUrls: [] });
   const [errors, setErrors] = useState({});
   const [districts, setDistricts] = useState([]);
   const [facilityTypes, setFacilityTypes] = useState([]);
@@ -240,58 +265,99 @@ export default function Home() {
     );
   }
 
+  const scrollToForm = () => {
+    document.getElementById('complaint-flow')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="page-wrapper">
       <Navbar />
-      <div className="hero">
-        <div className="hero-content">
-          <h1>Report a WiFi Issue</h1>
-          <p>Experiencing connectivity issues at your health facility? Register a complaint and our team will resolve it promptly.</p>
-        </div>
-      </div>
+      <div className="home-public-bg">
+        <section className="report-cta-card" aria-label="Report or track complaint">
+          <div className="report-cta-inner">
+            <div className="report-cta-copy">
+              <div className="report-cta-heading-row">
+                <h2 className="report-cta-title">Report WiFi Issue</h2>
+                <ReportWifiBadge variant="inline" />
+              </div>
+              <p className="report-cta-desc">
+                Facing internet issues at your health facility? Raise a complaint in seconds.
+              </p>
+              <div className="report-cta-buttons">
+                <button
+                  type="button"
+                  className="btn-report-primary"
+                  onClick={() => { setStep(0); scrollToForm(); }}
+                >
+                  Report New Issue
+                </button>
+                <button type="button" className="btn-report-secondary" onClick={() => navigate('/track')}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M21 21l-4.35-4.35" />
+                  </svg>
+                  Track Complaint
+                </button>
+              </div>
+            </div>
+            <ReportWifiBadge variant="side" />
+          </div>
+        </section>
 
-      <div className="form-content" style={{ flex: 1 }}>
-        {/* Quick Track Link */}
-        <div className="flex justify-between items-center mb-3">
-          <div />
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/track')}>🔍 Track existing complaint</button>
-        </div>
+        <StepIndicator current={step} />
 
-        <div className="card">
-          <div className="card-body">
-            <StepIndicator current={step} />
-
+        <div id="complaint-flow" className="complaint-form-shell">
+          <div className="complaint-form-card">
+            <div className="card-body">
             {/* Step 0: Facility Selection */}
             {step === 0 && (
               <div>
-                <h3 className="mb-3">Select Health Facility</h3>
+                <h3 className="complaint-step-heading">Select Health Facility</h3>
                 {facilityError && <div className="alert alert-error mb-3">{facilityError}</div>}
                 <div className="form-group">
-                  <label className="form-label">District <span className="req">*</span></label>
-                  <select className="form-control" value={form.district} onChange={e => set('district', e.target.value)}>
-                    <option value="">-- Select District --</option>
-                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                  <div className="form-label-row">
+                    <span className="label-icon" aria-hidden>📍</span>
+                    <span>District <span className="req">*</span></span>
+                  </div>
+                  <div className="field-select-wrap">
+                    <span className="field-select-wrap__icon" aria-hidden>🔍</span>
+                    <select className="form-control" value={form.district} onChange={e => set('district', e.target.value)} aria-label="Select district">
+                      <option value="">Select District</option>
+                      {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
                   {errors.district && <div className="form-error">{errors.district}</div>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Facility Type <span className="req">*</span></label>
-                  <select className="form-control" value={form.facilityType} onChange={e => set('facilityType', e.target.value)} disabled={!form.district}>
-                    <option value="">-- Select Facility Type --</option>
-                    {facilityTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
+                  <div className="form-label-row">
+                    <span className="label-icon" aria-hidden>🏥</span>
+                    <span>Facility Type <span className="req">*</span></span>
+                  </div>
+                  <div className="field-select-wrap">
+                    <span className="field-select-wrap__icon" aria-hidden>🏢</span>
+                    <select className="form-control" value={form.facilityType} onChange={e => set('facilityType', e.target.value)} disabled={!form.district} aria-label="Select facility type">
+                      <option value="">Select Type</option>
+                      {facilityTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
                   {errors.facilityType && <div className="form-error">{errors.facilityType}</div>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Health Facility <span className="req">*</span></label>
-                  <select className="form-control" value={form.facilityCode} onChange={e => {
-                    const fac = facilities.find(f => f.facility_code === e.target.value);
-                    set('facilityCode', e.target.value);
-                    set('facilityName', fac?.facility_name || '');
-                  }} disabled={!form.facilityType}>
-                    <option value="">-- Select Facility --</option>
-                    {facilities.map(f => <option key={f.facility_code} value={f.facility_code}>{f.facility_name}</option>)}
-                  </select>
+                  <div className="form-label-row">
+                    <span className="label-icon" aria-hidden>🏥</span>
+                    <span>Health Facility <span className="req">*</span></span>
+                  </div>
+                  <div className="field-select-wrap">
+                    <span className="field-select-wrap__icon" aria-hidden>🔍</span>
+                    <select className="form-control" value={form.facilityCode} onChange={e => {
+                      const fac = facilities.find(f => f.facility_code === e.target.value);
+                      set('facilityCode', e.target.value);
+                      set('facilityName', fac?.facility_name || '');
+                    }} disabled={!form.facilityType} aria-label="Select health facility">
+                      <option value="">Select Facility</option>
+                      {facilities.map(f => <option key={f.facility_code} value={f.facility_code}>{f.facility_name}</option>)}
+                    </select>
+                  </div>
                   {errors.facilityCode && <div className="form-error">{errors.facilityCode}</div>}
                 </div>
               </div>
@@ -300,7 +366,7 @@ export default function Home() {
             {/* Step 1: User Details */}
             {step === 1 && (
               <div>
-                <h3 className="mb-3">Your Contact Details</h3>
+                <h3 className="complaint-step-heading">Your Contact Details</h3>
                 <div className="form-group">
                   <label className="form-label">Full Name <span className="req">*</span></label>
                   <input className="form-control" placeholder="e.g. Rajesh Kumar" value={form.userName} onChange={e => set('userName', e.target.value)} />
@@ -360,7 +426,7 @@ export default function Home() {
             {/* Step 2: Issue Selection */}
             {step === 2 && (
               <div>
-                <h3 className="mb-3">What's the Issue?</h3>
+                <h3 className="complaint-step-heading">What&apos;s the Issue?</h3>
                 {errors.issueCategory && <div className="alert alert-error">{errors.issueCategory}</div>}
                 <div className="issue-grid">
                   {ISSUES.map(issue => (
@@ -402,7 +468,7 @@ export default function Home() {
             {/* Step 3: Confirm */}
             {step === 3 && (
               <div>
-                <h3 className="mb-3">Confirm Your Complaint</h3>
+                <h3 className="complaint-step-heading">Confirm Your Complaint</h3>
                 {errors.submit && <div className="alert alert-error">{errors.submit}</div>}
                 <div className="card" style={{ background: 'var(--gray-50)', marginBottom: 20 }}>
                   <div className="card-body" style={{ padding: 20 }}>
@@ -447,14 +513,24 @@ export default function Home() {
             )}
 
             {/* Navigation */}
-            <div className="flex justify-between mt-4">
-              {step > 0 ? <button className="btn btn-ghost" onClick={back}>← Back</button> : <div />}
-              {step < 3
-                ? <button className="btn btn-primary" onClick={next}>Continue →</button>
-                : <button className="btn btn-accent btn-lg" onClick={handleSubmit} disabled={loading}>
-                    {loading ? <><span className="spinner" /> Submitting...</> : '✓ Submit Complaint'}
-                  </button>
-              }
+            <div className="complaint-footer-actions">
+              {step > 0 ? (
+                <button type="button" className="btn btn-ghost complaint-back-btn" onClick={back}>
+                  ← Back
+                </button>
+              ) : (
+                <span className="complaint-back-btn" />
+              )}
+              {step < 3 ? (
+                <button type="button" className="btn btn-primary complaint-primary-action" onClick={next}>
+                  Continue
+                </button>
+              ) : (
+                <button type="button" className="btn btn-primary complaint-primary-action" onClick={handleSubmit} disabled={loading}>
+                  {loading ? <><span className="spinner" /> Submitting...</> : '✓ Submit Complaint'}
+                </button>
+              )}
+            </div>
             </div>
           </div>
         </div>
