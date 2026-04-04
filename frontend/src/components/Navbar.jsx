@@ -12,9 +12,11 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="navbar-inner">
-        <Link to="/" className="navbar-brand-cluster" aria-label="Home — Digital Swasthya Setu">
+      <div className="navbar-inner navbar-inner--public">
+        <Link to="/" className="navbar-brand-left" aria-label="Home — Digital Swasthya Setu">
           <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
+        </Link>
+        <Link to="/" className="navbar-brand-mid" aria-label="Home — Digital Swasthya Setu">
           <div className="navbar-text-stack">
             <span className="navbar-title">डिजिटल स्वास्थ्य सेतु</span>
             <span className="navbar-subtitle">स्वास्थ्य और संचार, हर कदम आपके साथ</span>
