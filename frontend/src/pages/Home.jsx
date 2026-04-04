@@ -273,42 +273,50 @@ export default function Home() {
     <div className="page-wrapper">
       <Navbar />
       <div className="home-public-bg">
-        <section className="report-cta-card" aria-label="Report or track complaint">
-          <div className="report-cta-inner">
-            <div className="report-cta-copy">
-              <div className="report-cta-heading-row">
-                <h2 className="report-cta-title">Report WiFi Issue</h2>
-                <ReportWifiBadge variant="inline" />
+        <div className="home-flow-shell">
+          <section className="report-cta-card" aria-label="Report or track complaint">
+            <div className="report-cta-inner">
+              <div className="report-cta-copy">
+                <div className="report-cta-heading-row">
+                  <h2 className="report-cta-title">Report WiFi Issue</h2>
+                  <ReportWifiBadge variant="inline" />
+                </div>
+                <p className="report-cta-desc">
+                  Facing internet issues at your health facility? Raise a complaint in seconds.
+                </p>
+                <div className="report-cta-buttons">
+                  <button
+                    type="button"
+                    className="btn-report-primary"
+                    onClick={() => { setStep(0); scrollToForm(); }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                      <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                      <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
+                    </svg>
+                    Report New Issue
+                  </button>
+                  <button type="button" className="btn-report-secondary" onClick={() => navigate('/track')}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                    Track Complaint
+                  </button>
+                </div>
               </div>
-              <p className="report-cta-desc">
-                Facing internet issues at your health facility? Raise a complaint in seconds.
-              </p>
-              <div className="report-cta-buttons">
-                <button
-                  type="button"
-                  className="btn-report-primary"
-                  onClick={() => { setStep(0); scrollToForm(); }}
-                >
-                  Report New Issue
-                </button>
-                <button type="button" className="btn-report-secondary" onClick={() => navigate('/track')}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M21 21l-4.35-4.35" />
-                  </svg>
-                  Track Complaint
-                </button>
-              </div>
+              <ReportWifiBadge variant="side" />
             </div>
-            <ReportWifiBadge variant="side" />
-          </div>
-        </section>
+          </section>
 
-        <StepIndicator current={step} />
+          <div id="complaint-flow" className="home-inner-elevated">
+            <StepIndicator current={step} />
 
-        <div id="complaint-flow" className="complaint-form-shell">
-          <div className="complaint-form-card">
-            <div className="card-body">
+            <div className="complaint-form-shell complaint-form-shell--nested">
+              <div className="complaint-form-card complaint-form-card--nested">
+                <div className="card-body">
             {/* Step 0: Facility Selection */}
             {step === 0 && (
               <div>
@@ -531,6 +539,8 @@ export default function Home() {
                 </button>
               )}
             </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

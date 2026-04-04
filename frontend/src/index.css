@@ -94,6 +94,19 @@ h4 { font-size: 1.05rem; }
 }
 .navbar-logo-slot--left { justify-content: flex-start; }
 .navbar-logo-slot--right { justify-content: flex-end; flex-wrap: wrap; }
+.navbar-logo-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+  border-radius: 10px;
+  line-height: 0;
+}
+.navbar-logo-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.95);
+  outline-offset: 2px;
+}
+.navbar-logo-link:hover .navbar-logo-img { opacity: 0.92; }
 .navbar-admin-left { display: flex; align-items: center; gap: 8px; }
 .navbar-brand-center {
   text-align: center;
@@ -325,28 +338,79 @@ tbody tr:last-child td { border-bottom: none; }
 .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
 .main-content { flex: 1; padding: 32px; overflow-x: hidden; }
 
-/* HOME — REPORT FLOW (senior mockup) */
+/* HOME — REPORT FLOW: starts at exact navbar colour → fades fast to soft blue → near-white. */
 .home-public-bg {
   flex: 1;
-  background: var(--gray-100);
-  padding-bottom: 24px;
+  background: linear-gradient(
+    180deg,
+    var(--primary) 0%,
+    #2e6ea3 7%,
+    #4e88bc 14%,
+    #72a6d0 22%,
+    #9dc4e6 38%,
+    #c4ddf2 58%,
+    #e2eff8 78%,
+    #f4f8fd 100%
+  );
+  padding: 20px 14px 40px;
+}
+.home-flow-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 22px;
+  padding: 22px 20px 28px;
+  box-shadow:
+    0 8px 32px rgba(15, 53, 99, 0.14),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+}
+/* No second nested card — step + form sit directly inside the outer shell */
+.home-inner-elevated {
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+}
+.home-inner-elevated .step-progress-shell {
+  max-width: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+.home-inner-elevated .step-progress-track {
+  background: #f4f7fb;
+  border: 1px solid var(--gray-200);
+  box-shadow: none;
+}
+.complaint-form-shell--nested {
+  max-width: none;
+  margin: 0;
+  padding: 0 0 12px;
+}
+.complaint-form-card--nested {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.complaint-form-card--nested .card-body {
+  padding: 4px 0 0;
 }
 .report-cta-card {
-  max-width: 720px;
-  margin: 0 auto 20px;
-  padding: 0 16px;
-  padding-top: 20px;
+  max-width: none;
+  margin: 0 0 0;
+  padding: 0;
 }
 .report-cta-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  background: linear-gradient(145deg, #e8f1fb 0%, #ffffff 45%, #f8fafc 100%);
-  border-radius: var(--radius-lg);
-  padding: 22px 22px 22px 24px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--gray-200);
+  background: transparent;
+  border-radius: 0;
+  padding: 4px 0 22px;
+  border-bottom: 1px solid var(--gray-100);
 }
 .report-cta-copy { flex: 1; min-width: 0; text-align: left; }
 .report-cta-heading-row {
@@ -383,13 +447,22 @@ tbody tr:last-child td { border-bottom: none; }
   margin-bottom: 18px;
   max-width: 320px;
 }
-.report-cta-buttons { display: flex; flex-direction: column; gap: 10px; max-width: 280px; }
+.report-cta-buttons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+  max-width: 100%;
+}
 .btn-report-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 100%;
+  flex: 1 1 160px;
+  min-width: 0;
+  width: auto;
   padding: 12px 18px;
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -423,7 +496,9 @@ tbody tr:last-child td { border-bottom: none; }
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 100%;
+  flex: 1 1 160px;
+  min-width: 0;
+  width: auto;
   padding: 12px 18px;
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -442,58 +517,78 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 @media (max-width: 768px) {
-  .report-cta-inner { flex-direction: column; align-items: stretch; padding: 20px; }
-  /* One alignment for the whole block: title, body, buttons all left — reads cleaner than mixed center/left */
+  .home-public-bg { padding: 14px 10px 32px; }
+  .home-flow-shell { padding: 16px 14px 22px; border-radius: 18px; }
+  .home-inner-elevated { padding: 0; border-radius: 0; }
+  /* Mobile CTA: no extra horizontal padding (outer shell handles it), column stacks title+desc above buttons */
+  .report-cta-inner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 4px 0 16px;
+    gap: 0;
+  }
   .report-cta-copy { text-align: left; }
   .report-cta-heading-row {
     justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 10px;
     width: 100%;
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
   .report-cta-title {
     flex: 1;
     min-width: 0;
     text-align: left;
-    font-size: clamp(1.05rem, 4.2vw, 1.28rem);
+    font-size: clamp(1.1rem, 5vw, 1.3rem);
     line-height: 1.2;
   }
+  /* Show inline WiFi badge (top-right of title row) on mobile; hide the side badge */
   .report-cta-art--inline {
     display: flex;
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     flex-shrink: 0;
+    align-self: flex-start;
   }
   .report-cta-art--inline .report-cta-art-circle {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
   }
   .report-cta-art--inline .report-cta-wifi-logo {
-    max-width: 46px;
-    max-height: 46px;
+    max-width: 52px;
+    max-height: 52px;
   }
-  .report-cta-art--side {
-    display: none !important;
-  }
+  .report-cta-art--side { display: none !important; }
   .report-cta-desc {
     text-align: left;
-    margin-left: 0;
-    margin-right: 0;
     max-width: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
   }
+  /* Force buttons side-by-side, no wrap, equal widths, smaller padding on mobile */
   .report-cta-buttons {
-    max-width: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     width: 100%;
+    max-width: 100%;
+    gap: 8px;
+  }
+  .btn-report-primary,
+  .btn-report-secondary {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 11px 10px;
+    font-size: 0.82rem;
+    gap: 6px;
   }
 }
 
 /* Step progress bar (mockup) */
 .step-progress-shell {
   max-width: 720px;
-  margin: 0 auto 16px;
-  padding: 0 16px;
+  margin: 18px auto 16px;
+  padding: 0;
 }
 .step-progress-meta {
   font-size: 0.8rem;
@@ -771,7 +866,23 @@ tbody tr:last-child td { border-bottom: none; }
   .navbar { padding: 0 12px; }
   .navbar-inner { min-height: 76px; height: auto; padding: 10px 0; gap: 8px; }
   .navbar-title { font-size: clamp(1rem, 4.2vw, 1.18rem); }
-  .navbar-subtitle { display: block; font-size: clamp(0.72rem, 3vw, 0.88rem); max-width: min(34ch, 88vw); line-height: 1.35; }
+  .navbar-brand-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .navbar-subtitle {
+    display: block;
+    white-space: nowrap;
+    margin-top: 4px;
+    max-width: 100%;
+    line-height: 1.2;
+    font-size: clamp(0.52rem, 2.35vw, 0.76rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .navbar-logo-img { width: 54px; height: 54px; padding: 3px; }
   .navbar-user { font-size: 0.75rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navbar-role { font-size: 0.65rem; padding: 2px 8px; }

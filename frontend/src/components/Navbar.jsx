@@ -14,7 +14,9 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner navbar-inner-split">
         <div className="navbar-logo-slot navbar-logo-slot--left">
-          <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img" />
+          <Link to="/" className="navbar-logo-link" aria-label="Home — Digital Swasthya Setu">
+            <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
+          </Link>
         </div>
 
         <Link to="/" className="navbar-brand-center">
@@ -23,7 +25,9 @@ export default function Navbar() {
         </Link>
 
         <div className="navbar-logo-slot navbar-logo-slot--right">
-          <img src="/logos/bsnl.png" alt="BSNL" className="navbar-logo-img" />
+          <Link to="/" className="navbar-logo-link" aria-label="Home — Digital Swasthya Setu">
+            <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img" />
+          </Link>
           {user && (
             <div className="navbar-actions navbar-actions--compact">
               <span className="navbar-user navbar-user--compact">{user.name}</span>
