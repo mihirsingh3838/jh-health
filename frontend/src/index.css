@@ -1126,20 +1126,20 @@ tbody tr:last-child td { border-bottom: none; }
   .navbar-logo-cell--right { gap: 4px; }
   /* logos scale for small screens */
   .navbar-logo-img--bsnl {
-    height: 62px;
-    max-width: clamp(106px, 28vw, 155px);
+    height: 96px;
+    max-width: clamp(140px, 36vw, 200px);
     padding: 2px 4px;
-    border-radius: 12px;
+    border-radius: 14px;
   }
   .navbar-logo-img--abdm {
-    height: 62px;
-    max-width: clamp(86px, 24vw, 135px);
+    height: 96px;
+    max-width: clamp(110px, 30vw, 175px);
     padding: 2px 4px;
-    border-radius: 12px;
+    border-radius: 14px;
   }
   .navbar-jharkhand-banner {
-    width: 72px;
-    height: 72px;
+    width: 110px;
+    height: 110px;
     padding: 1px;
   }
   /* scheme banner & pill scale */
