@@ -63,12 +63,9 @@ h4 { font-size: 1.05rem; }
 
 /* NAVBAR */
 .navbar {
-  background: var(--primary);
-  padding: 0 1.5rem;
-  position: sticky;
-  top: 0;
+  background: transparent;
+  padding: 0 clamp(12px, 3vw, 36px);
   z-index: 100;
-  box-shadow: 0 2px 12px rgba(15,76,129,0.3);
 }
 .navbar-inner {
   max-width: 1200px;
@@ -81,10 +78,17 @@ h4 { font-size: 1.05rem; }
   padding-top: 8px;
   padding-bottom: 8px;
 }
-/* Grid overrides flex when both classes are present */
+/* Public bar: stacked logo row + text (full width up to max) */
 .navbar-inner.navbar-inner--public {
-  display: grid;
-  justify-content: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  max-width: min(1680px, 100%);
+  width: 100%;
+  min-height: 0;
+  padding-top: 14px;
+  padding-bottom: 16px;
 }
 .navbar-inner-split {
   display: grid;
@@ -122,57 +126,165 @@ h4 { font-size: 1.05rem; }
   min-width: 0;
   padding: 0 6px;
 }
-/* Public nav: BSNL | centered Hindi | ABDM (equal side columns keep text visually centered) */
-.navbar-inner--public {
-  grid-template-columns: 1fr auto 1fr;
+/* ── Public navbar shell ─────────────────────────────────── */
+.navbar-public-wrap {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px 12px;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 0 14px;
+}
+
+/* ── Three-logo grid: BSNL left · Jharkhand centre · ABDM right ─ */
+.navbar-logo-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 16px;
   width: 100%;
 }
-.navbar-brand-left {
-  grid-column: 1;
+.navbar-logo-cell {
   display: flex;
   align-items: center;
-  justify-self: start;
+  min-width: 0;
+}
+.navbar-logo-cell--left  { justify-content: flex-start; }
+.navbar-logo-cell--center{ justify-content: center; }
+.navbar-logo-cell--right { justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+/* BSNL — wide white rounded tile */
+.navbar-brand-left {
+  display: flex;
+  align-items: center;
   text-decoration: none;
   color: inherit;
   line-height: 0;
+  flex-shrink: 0;
 }
-.navbar-brand-mid {
-  grid-column: 2;
+.navbar-logo-img--bsnl {
+  width: auto;
+  height: 82px;
+  max-height: 90px;
+  max-width: clamp(150px, 32vw, 230px);
+  object-fit: contain;
+  border-radius: 16px;
+  background: #fff;
+  padding: 3px 6px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.14);
+  transition: transform 0.2s ease;
+}
+.navbar-brand-left:hover .navbar-logo-img--bsnl { transform: translateY(-1px); }
+
+/* Jharkhand — circular white tile */
+.navbar-jharkhand-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  justify-self: center;
+  text-decoration: none;
+  color: inherit;
+  line-height: 0;
+  flex-shrink: 0;
+}
+.navbar-jharkhand-banner {
+  display: block;
+  width: 96px;
+  height: 96px;
+  max-width: none;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.14);
+}
+
+/* ABDM — white rounded tile */
+.navbar-logo-img--abdm {
+  width: auto;
+  height: 82px;
+  max-height: 90px;
+  max-width: clamp(120px, 26vw, 190px);
+  object-fit: contain;
+  border-radius: 16px;
+  background: #fff;
+  padding: 3px 6px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.14);
+  transition: transform 0.2s ease;
+}
+.navbar-logo-link:hover .navbar-logo-img--abdm { transform: translateY(-1px); }
+
+/* ── Text block ──────────────────────────────────────────── */
+.navbar-brand-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   text-decoration: none;
   color: inherit;
-  min-width: 0;
-  max-width: 100%;
-  padding: 4px 0;
+  gap: 8px;
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
 }
-.navbar-inner--public .navbar-trail {
-  grid-column: 3;
-}
-.navbar .navbar-title,
-.navbar .navbar-subtitle {
+
+/* Scheme name — dark-green pill with golden border (reference) */
+.navbar-scheme-banner {
+  display: inline-block;
   font-family: var(--font-hindi);
-  font-feature-settings: 'kern' 1;
+  font-size: clamp(0.82rem, 2.2vw, 1.05rem);
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #1a6b3c 0%, #0f4f2a 100%);
+  border: 2.5px solid #d4a017;
+  border-radius: 100px;
+  padding: 6px 22px;
+  letter-spacing: 0.03em;
+  line-height: 1.45;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
   -webkit-font-smoothing: antialiased;
 }
-.navbar-text-stack {
-  display: flex;
+
+/* Portal name — blue pill containing title + subtitle */
+.navbar-title-pill {
+  display: inline-flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-width: 0;
-}
-.navbar-brand-mid .navbar-text-stack {
   align-items: center;
-  text-align: center;
-  width: 100%;
-  min-width: 0;
+  font-family: var(--font-hindi);
+  color: #fff;
+  background: linear-gradient(135deg, #1760a8 0%, var(--primary) 100%);
+  border-radius: 100px;
+  padding: 10px 32px 12px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.22);
+  box-shadow: 0 4px 16px rgba(15, 76, 129, 0.3);
+  -webkit-font-smoothing: antialiased;
+  gap: 0;
 }
+.navbar-title-text {
+  font-size: clamp(1.15rem, 4vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1.3;
+}
+.navbar-pill-divider {
+  display: block;
+  width: 60%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.35);
+  margin: 5px auto;
+  border-radius: 1px;
+}
+.navbar-subtitle-inside {
+  font-size: clamp(0.65rem, 1.8vw, 0.82rem);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Staff actions (logged in) */
 .navbar-trail {
   display: flex;
   align-items: center;
@@ -180,11 +292,6 @@ h4 { font-size: 1.05rem; }
   gap: 8px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  justify-self: end;
-}
-/* Circular crop for trail logo (ABDM) */
-.navbar-logo-img--trail {
-  border-radius: 50%;
 }
 .navbar-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .navbar-logo-group { display: flex; align-items: center; gap: 8px; }
@@ -208,12 +315,6 @@ h4 { font-size: 1.05rem; }
   max-width: min(40ch, 92vw);
   margin-left: auto;
   margin-right: auto;
-}
-.navbar-brand-mid .navbar-subtitle {
-  margin-top: 2px;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 100%;
 }
 .navbar-actions { display: flex; align-items: center; gap: 12px; }
 .navbar-actions--compact { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
@@ -432,20 +533,28 @@ tbody tr:last-child td { border-bottom: none; }
 .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
 .main-content { flex: 1; padding: 32px; overflow-x: hidden; }
 
-/* HOME — REPORT FLOW: starts at exact navbar colour → fades fast to soft blue → near-white. */
-.home-public-bg {
+/* HOME — gradient wrap: one continuous gradient behind navbar + content */
+.home-gradient-wrap {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   background: linear-gradient(
     180deg,
     var(--primary) 0%,
-    #2e6ea3 7%,
-    #4e88bc 14%,
-    #72a6d0 22%,
-    #9dc4e6 38%,
-    #c4ddf2 58%,
-    #e2eff8 78%,
+    var(--primary) 2%,
+    #2a6a9e 16%,
+    #4e88bc 28%,
+    #72a6d0 42%,
+    #9dc4e6 56%,
+    #c4ddf2 70%,
+    #e2eff8 84%,
     #f4f8fd 100%
   );
+}
+
+.home-public-bg {
+  flex: 1;
+  background: transparent;
   padding: 20px 14px 40px;
 }
 .home-flow-shell {
@@ -952,6 +1061,23 @@ tbody tr:last-child td { border-bottom: none; }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
   .navbar-inner { padding: 0 12px; }
   .navbar-logo-img { width: 58px; height: 58px; }
+  .navbar-logo-img--bsnl {
+    height: 72px;
+    max-width: clamp(130px, 28vw, 210px);
+    padding: 2px 5px;
+  }
+  .navbar-logo-img--abdm {
+    height: 72px;
+    max-width: clamp(104px, 22vw, 170px);
+    padding: 2px 5px;
+  }
+  .navbar-jharkhand-banner {
+    width: 86px;
+    height: 86px;
+    padding: 2px;
+  }
+  .navbar-logo-row { gap: 8px 12px; }
+  .navbar-public-wrap { gap: 10px; }
   .navbar-title { font-size: clamp(0.95rem, 3vw, 1.2rem); }
   .navbar-subtitle { font-size: clamp(0.7rem, 2.2vw, 0.88rem); }
   .main-content { padding: 24px 20px; }
@@ -989,43 +1115,48 @@ tbody tr:last-child td { border-bottom: none; }
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* Public navbar: centered Hindi; room for Devanagari ascenders (no top clip) */
-  .navbar-inner--public {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 6px 8px;
-    align-items: center;
-    padding-top: 12px;
+  /* Public navbar mobile */
+  .navbar-inner.navbar-inner--public {
+    min-height: unset;
+    padding-top: 10px;
     padding-bottom: 12px;
   }
-  .navbar-brand-mid {
-    padding: 6px 2px;
-    overflow: visible;
+  .navbar-public-wrap { gap: 8px; }
+  .navbar-logo-row { gap: 4px 8px; }
+  .navbar-logo-cell--right { gap: 4px; }
+  /* logos scale for small screens */
+  .navbar-logo-img--bsnl {
+    height: 62px;
+    max-width: clamp(106px, 28vw, 155px);
+    padding: 2px 4px;
+    border-radius: 12px;
   }
-  .navbar-brand-mid .navbar-text-stack {
-    overflow: visible;
-    align-items: center;
+  .navbar-logo-img--abdm {
+    height: 62px;
+    max-width: clamp(86px, 24vw, 135px);
+    padding: 2px 4px;
+    border-radius: 12px;
   }
-  .navbar-brand-mid .navbar-title {
-    font-size: clamp(1.02rem, 4.2vw, 1.28rem);
-    line-height: 1.42;
-    text-align: center;
-    padding-top: 2px;
+  .navbar-jharkhand-banner {
+    width: 72px;
+    height: 72px;
+    padding: 1px;
   }
-  .navbar-brand-mid .navbar-subtitle {
-    white-space: nowrap;
-    margin-top: 4px;
-    font-size: clamp(0.56rem, 2.35vw, 0.74rem);
-    line-height: 1.45;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+  /* scheme banner & pill scale */
+  .navbar-scheme-banner {
+    font-size: clamp(0.72rem, 3.8vw, 0.92rem);
+    padding: 5px 16px;
+    border-width: 2px;
   }
-  .navbar-logo-img--trail {
-    width: 50px;
-    height: 50px;
-    padding: 3px;
+  .navbar-title-pill {
+    padding: 8px 24px 10px;
   }
-  .navbar-logo-img { width: 54px; height: 54px; padding: 3px; }
+  .navbar-title-text {
+    font-size: clamp(1rem, 5.5vw, 1.4rem);
+  }
+  .navbar-subtitle-inside {
+    font-size: clamp(0.6rem, 2.8vw, 0.76rem);
+  }
   .navbar-user { font-size: 0.75rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .navbar-role { font-size: 0.65rem; padding: 2px 8px; }
   .navbar-actions { gap: 8px; }

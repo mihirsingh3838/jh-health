@@ -240,6 +240,7 @@ export default function Home() {
   if (submitted) {
     return (
       <div className="page-wrapper">
+        <div className="home-gradient-wrap">
         <Navbar />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
           <div className="card" style={{ maxWidth: 520, width: '100%' }}>
@@ -260,6 +261,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        </div>{/* home-gradient-wrap */}
         <PublicFooter />
       </div>
     );
@@ -271,6 +273,7 @@ export default function Home() {
 
   return (
     <div className="page-wrapper">
+      <div className="home-gradient-wrap">
       <Navbar />
       <div className="home-public-bg">
         <div className="home-flow-shell">
@@ -545,6 +548,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      </div>{/* home-gradient-wrap */}
       <PublicFooter />
     </div>
   );
