@@ -135,7 +135,7 @@ export default function EngineerDashboard() {
                 </div>
                 <div className="mt-2">
                   <div className="text-xs text-muted font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Issue</div>
-                  <div className="text-sm" style={{ color: 'var(--gray-700)' }}>{c.issueCategory}</div>
+                  <div className="text-sm" style={{ color: 'var(--gray-700)' }}>{Array.isArray(c.issueCategory) ? c.issueCategory.join(', ') : c.issueCategory}</div>
                   {c.issueDescription && <div className="text-xs text-muted mt-1">{c.issueDescription}</div>}
                 </div>
                 <div className="text-xs text-muted mt-2">Submitted: {fmt(c.createdAt)}</div>
@@ -174,7 +174,7 @@ export default function EngineerDashboard() {
             <div className="modal-body">
               <div style={{ padding: '12px', background: 'var(--gray-50)', borderRadius: 8, marginBottom: 16, fontSize: '0.875rem' }}>
                 <strong>{selected.facilityName}</strong><br />
-                <span className="text-muted">{selected.issueCategory}</span>
+                <span className="text-muted">{Array.isArray(selected.issueCategory) ? selected.issueCategory.join(', ') : selected.issueCategory}</span>
                 {selected.issueDescription && <div className="text-xs text-muted mt-1">{selected.issueDescription}</div>}
                 {(selected.attachmentUrls || []).length > 0 && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>

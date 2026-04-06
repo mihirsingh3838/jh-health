@@ -284,7 +284,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="text-sm">{c.district}</td>
                           <td><div className="text-sm" style={{ maxWidth: 180 }}>{c.facilityName}<br /><span className="text-xs text-muted">{c.facilityType}</span></div></td>
-                          <td className="text-sm" style={{ maxWidth: 160 }}>{c.issueCategory}</td>
+                          <td className="text-sm" style={{ maxWidth: 160 }}>{Array.isArray(c.issueCategory) ? c.issueCategory.join(', ') : c.issueCategory}</td>
                           <td><StatusBadge status={c.status} /></td>
                           <td className="text-sm">{c.assignedTo?.name || <span className="text-muted">Unassigned</span>}</td>
                           <td className="text-xs text-muted" style={{ whiteSpace: 'nowrap' }}>{fmt(c.createdAt)}</td>

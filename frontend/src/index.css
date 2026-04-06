@@ -67,6 +67,11 @@ h4 { font-size: 1.05rem; }
   padding: 0 clamp(12px, 3vw, 36px);
   z-index: 100;
 }
+/* Staff dashboards: solid bar (public pages use transparent + gradient / hero) */
+.navbar:has(.navbar-inner-split) {
+  background: var(--primary);
+  box-shadow: 0 2px 12px rgba(8, 40, 72, 0.18);
+}
 .navbar-inner {
   max-width: 1200px;
   margin: 0 auto;
@@ -89,6 +94,18 @@ h4 { font-size: 1.05rem; }
   min-height: 0;
   padding-top: 14px;
   padding-bottom: 16px;
+}
+/* Public Navbar.jsx — branding lives in hero; hide bar chrome */
+.navbar:has(.navbar-inner--minimal) {
+  padding: 0;
+  min-height: 0;
+}
+.navbar-inner.navbar-inner--minimal {
+  display: none;
+}
+.home-gradient-wrap > .navbar:first-of-type:has(.navbar-inner--minimal) {
+  border-bottom: none;
+  box-shadow: none;
 }
 .navbar-inner-split {
   display: grid;
@@ -557,6 +574,61 @@ tbody tr:last-child td { border-bottom: none; }
   background: transparent;
   padding: 20px 14px 40px;
 }
+
+/* Full-width banner under public navbar — visible below 769px only (see media query) */
+.home-hero {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.home-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(36px, 9vw, 80px);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(200, 222, 242, 0.55),
+    rgba(244, 248, 253, 0.97)
+  );
+  pointer-events: none;
+}
+.home-hero-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: top;
+}
+
+/* Official banner: show only on small screens (matches app mobile breakpoint) */
+@media (min-width: 769px) {
+  .home-hero {
+    display: none;
+  }
+}
+
+/* Light edge so navbar separates from sky in the hero image */
+.home-gradient-wrap > .navbar:first-of-type {
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 22px rgba(8, 40, 72, 0.07);
+}
+
+.home-success-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: transparent;
+}
 .home-flow-shell {
   max-width: 720px;
   margin: 0 auto;
@@ -972,6 +1044,7 @@ tbody tr:last-child td { border-bottom: none; }
 /* ISSUE CARDS for selection */
 .issue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .issue-card {
+  position: relative;
   padding: 16px;
   border: 2px solid var(--gray-200);
   border-radius: var(--radius-sm);
@@ -980,13 +1053,30 @@ tbody tr:last-child td { border-bottom: none; }
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  user-select: none;
 }
 .issue-card:hover { border-color: var(--primary-light); background: #F7FAFD; }
-.issue-card.selected { border-color: var(--primary); background: #EEF4FB; }
+.issue-card.selected { border-color: var(--primary); background: #EEF4FB; box-shadow: 0 0 0 1px var(--primary); }
 .issue-card-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--gray-100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.2rem; }
 .issue-card.selected .issue-card-icon { background: var(--primary); }
 .issue-card-title { font-size: 0.85rem; font-weight: 600; color: var(--gray-700); }
 .issue-card-desc { font-size: 0.75rem; color: var(--gray-500); margin-top: 2px; }
+.issue-card-check {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
 
 /* SUCCESS STATE */
 .success-box {

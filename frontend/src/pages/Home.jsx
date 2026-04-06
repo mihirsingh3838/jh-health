@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { getDistricts, getFacilityTypes, getFacilities, sendEmailOTP, verifyEmailOTP, submitComplaint, uploadComplaintImages } from '../api';
 import Navbar from '../components/Navbar';
+import HomeHeroBanner from '../components/HomeHeroBanner';
 import PublicFooter from '../components/PublicFooter';
 import { useNavigate } from 'react-router-dom';
 
@@ -63,7 +64,7 @@ function StepIndicator({ current }) {
 
 export default function Home() {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ userName: '', mobile: '', email: '', district: '', facilityType: '', facilityCode: '', facilityName: '', issueCategory: '', issueDescription: '', attachmentUrls: [] });
+  const [form, setForm] = useState({ userName: '', mobile: '', email: '', district: '', facilityType: '', facilityCode: '', facilityName: '', issueCategory: [], issueDescription: '', attachmentUrls: [] });
   const [errors, setErrors] = useState({});
   const [districts, setDistricts] = useState([]);
   const [facilityTypes, setFacilityTypes] = useState([]);
@@ -140,9 +141,18 @@ export default function Home() {
     return Object.keys(e).length === 0;
   };
   const validate2 = () => {
-    if (!form.issueCategory) { setErrors({ issueCategory: 'Select an issue' }); return false; }
+    if (!form.issueCategory.length) { setErrors({ issueCategory: 'Select at least one issue' }); return false; }
     setErrors({});
     return true;
+  };
+
+  const toggleIssue = (id) => {
+    setForm(f => {
+      const current = f.issueCategory;
+      const next = current.includes(id) ? current.filter(x => x !== id) : [...current, id];
+      return { ...f, issueCategory: next };
+    });
+    setErrors(e => ({ ...e, issueCategory: undefined }));
   };
 
   const next = () => {
@@ -242,7 +252,8 @@ export default function Home() {
       <div className="page-wrapper">
         <div className="home-gradient-wrap">
         <Navbar />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+        <HomeHeroBanner />
+        <div className="home-success-area">
           <div className="card" style={{ maxWidth: 520, width: '100%' }}>
             <div className="card-body success-box">
               <div className="success-icon">
@@ -256,7 +267,7 @@ export default function Home() {
               </div>
               <div className="flex gap-2 mt-3" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button className="btn btn-outline" onClick={() => navigate('/track')}>Track Status</button>
-                <button className="btn btn-primary" onClick={() => { setSubmitted(null); setStep(0); setForm({ userName:'',mobile:'',email:'',district:'',facilityType:'',facilityCode:'',facilityName:'',issueCategory:'',issueDescription:'',attachmentUrls:[] }); setEmailVerified(false); setOtpSent(false); setOtpInput(''); setOtpError(''); setImageError(''); localStorage.removeItem('trackEmail'); localStorage.removeItem('trackMobile'); }}>New Complaint</button>
+                <button className="btn btn-primary" onClick={() => { setSubmitted(null); setStep(0); setForm({ userName:'',mobile:'',email:'',district:'',facilityType:'',facilityCode:'',facilityName:'',issueCategory:[],issueDescription:'',attachmentUrls:[] }); setEmailVerified(false); setOtpSent(false); setOtpInput(''); setOtpError(''); setImageError(''); localStorage.removeItem('trackEmail'); localStorage.removeItem('trackMobile'); }}>New Complaint</button>
               </div>
             </div>
           </div>
@@ -275,6 +286,7 @@ export default function Home() {
     <div className="page-wrapper">
       <div className="home-gradient-wrap">
       <Navbar />
+      <HomeHeroBanner />
       <div className="home-public-bg">
         <div className="home-flow-shell">
           <section className="report-cta-card" aria-label="Report or track complaint">
@@ -438,15 +450,25 @@ export default function Home() {
             {step === 2 && (
               <div>
                 <h3 className="complaint-step-heading">What&apos;s the Issue?</h3>
+                <p className="text-sm text-muted mb-2" style={{ marginTop: -4 }}>You can select more than one.</p>
                 {errors.issueCategory && <div className="alert alert-error">{errors.issueCategory}</div>}
                 <div className="issue-grid">
                   {ISSUES.map(issue => (
-                    <div key={issue.id} className={`issue-card ${form.issueCategory === issue.id ? 'selected' : ''}`} onClick={() => set('issueCategory', issue.id)}>
+                    <div
+                      key={issue.id}
+                      className={`issue-card ${form.issueCategory.includes(issue.id) ? 'selected' : ''}`}
+                      onClick={() => toggleIssue(issue.id)}
+                      role="checkbox"
+                      aria-checked={form.issueCategory.includes(issue.id)}
+                    >
                       <div className="issue-card-icon">{issue.icon}</div>
                       <div>
                         <div className="issue-card-title">{issue.title}</div>
                         <div className="issue-card-desc">{issue.desc}</div>
                       </div>
+                      {form.issueCategory.includes(issue.id) && (
+                        <span className="issue-card-check" aria-hidden>✓</span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -491,13 +513,20 @@ export default function Home() {
                         ['District', form.district],
                         ['Facility Type', form.facilityType],
                         ['Facility', form.facilityName],
-                        ['Issue', form.issueCategory],
                       ].map(([k, v]) => (
                         <div key={k}>
                           <div className="text-xs text-muted font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
                           <div className="text-sm font-semibold" style={{ color: 'var(--gray-700)', marginTop: 2 }}>{v}</div>
                         </div>
                       ))}
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <div className="text-xs text-muted font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Issue{form.issueCategory.length > 1 ? 's' : ''}</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                          {form.issueCategory.map(iss => (
+                            <span key={iss} style={{ background: 'var(--primary)', color: '#fff', borderRadius: 20, padding: '2px 10px', fontSize: '0.78rem', fontWeight: 600 }}>{iss}</span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     {form.issueDescription && (
                       <div className="mt-2">

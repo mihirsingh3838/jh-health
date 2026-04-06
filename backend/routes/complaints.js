@@ -107,11 +107,12 @@ router.post('/', async (req, res) => {
     }
     verifiedEmailStore.delete(normalizedEmail); // One-time use
 
+    const issueList = Array.isArray(issueCategory) ? issueCategory : [issueCategory];
     const complaint = await Complaint.create({
       userName, mobile, email, district, facilityType, facilityName, facilityCode,
-      issueCategory, issueDescription,
+      issueCategory: issueList, issueDescription,
       attachmentUrls: Array.isArray(attachmentUrls) ? attachmentUrls.slice(0, 2) : [],
-      activityLog: [{ action: 'Complaint Registered', performedBy: userName, performedByRole: 'user', notes: `Issue: ${issueCategory}` }]
+      activityLog: [{ action: 'Complaint Registered', performedBy: userName, performedByRole: 'user', notes: `Issue(s): ${issueList.join(', ')}` }]
     });
 
     res.status(201).json({

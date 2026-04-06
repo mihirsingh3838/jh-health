@@ -12,21 +12,28 @@ const complaintSchema = new mongoose.Schema({
   facilityName: { type: String, required: true },
   facilityCode: { type: String, required: true },
 
-  // Complaint details
+  // Complaint details — array so users can pick multiple issues
   issueCategory: {
-    type: String,
+    type: [String],
     required: true,
-    enum: [
-      'No Internet Connectivity',
-      'Slow Internet Speed',
-      'Frequent Disconnections',
-      'WiFi Not Visible / SSID Not Broadcasting',
-      'Unable to Connect to WiFi',
-      'Limited Connectivity (Connected but No Internet)',
-      'Router / Access Point Not Working',
-      'Power Issue at Equipment',
-      'Other'
-    ]
+    validate: {
+      validator: arr => Array.isArray(arr) && arr.length > 0,
+      message: 'At least one issue must be selected'
+    },
+    enum: {
+      values: [
+        'No Internet Connectivity',
+        'Slow Internet Speed',
+        'Frequent Disconnections',
+        'WiFi Not Visible / SSID Not Broadcasting',
+        'Unable to Connect to WiFi',
+        'Limited Connectivity (Connected but No Internet)',
+        'Router / Access Point Not Working',
+        'Power Issue at Equipment',
+        'Other'
+      ],
+      message: 'Invalid issue category: {VALUE}'
+    }
   },
   issueDescription: { type: String, trim: true },
   attachmentUrls: [{ type: String }], // Optional images (screenshots, etc.) - max 2

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { trackComplaintsByContact } from '../api';
 import Navbar from '../components/Navbar';
+import HomeHeroBanner from '../components/HomeHeroBanner';
 import PublicFooter from '../components/PublicFooter';
 import StatusBadge from '../components/StatusBadge';
 
@@ -52,11 +53,17 @@ export default function TrackTicket() {
   };
 
   const fmt = (d) => d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+  const fmtIssues = (cat) => {
+    if (Array.isArray(cat)) return cat.length ? cat.join(', ') : '—';
+    return cat || '—';
+  };
 
   return (
     <div className="page-wrapper">
+      <div className="home-gradient-wrap">
       <Navbar />
-      <div style={{ flex: 1, background: 'var(--gray-50)' }}>
+      <HomeHeroBanner />
+      <div className="home-public-bg">
         <div className="track-wrapper">
           <div className="text-center mb-4">
             <h2>Track Your Complaint</h2>
@@ -161,7 +168,7 @@ export default function TrackTicket() {
                       ['District', complaint.district],
                       ['Facility', complaint.facilityName],
                       ['Facility Type', complaint.facilityType],
-                      ['Issue', complaint.issueCategory],
+                      ['Issue', fmtIssues(complaint.issueCategory)],
                     ].map(([k, v]) => (
                       <div key={k} style={{ borderBottom: '1px solid var(--gray-100)', paddingBottom: 12 }}>
                         <div className="text-xs text-muted font-semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
@@ -201,6 +208,7 @@ export default function TrackTicket() {
             ))
           )}
         </div>
+      </div>
       </div>
       <PublicFooter />
     </div>
