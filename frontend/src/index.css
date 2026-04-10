@@ -1268,6 +1268,47 @@ tbody tr:last-child td { border-bottom: none; }
   .navbar-role { font-size: 0.65rem; padding: 2px 8px; }
   .navbar-actions { gap: 8px; }
   .navbar-actions .btn { padding: 6px 10px; font-size: 0.75rem; }
+  /* Staff navbar (admin/engineer): compact, readable mobile layout */
+  .navbar-inner.navbar-inner-split {
+    min-height: 64px;
+    padding: 8px 0;
+  }
+  .navbar-inner-split .navbar-logo-img {
+    width: 42px;
+    height: 42px;
+    padding: 2px;
+    border-radius: 8px;
+  }
+  .navbar-inner-split .navbar-logo-slot {
+    gap: 6px;
+  }
+  .navbar-inner-split .navbar-logo-slot--right {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .navbar-inner-split .navbar-title {
+    font-size: clamp(0.9rem, 4vw, 1.05rem);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .navbar-inner-split .navbar-brand-center .navbar-subtitle {
+    display: none;
+  }
+  .navbar-inner-split .navbar-user--compact,
+  .navbar-inner-split .navbar-role--compact {
+    display: none;
+  }
+  .navbar-inner-split .navbar-actions--compact .btn {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+  }
+  /* Admin has hamburger already; hide extra left logo to avoid crowding */
+  .navbar-admin-left .navbar-logo-img {
+    display: none;
+  }
   .steps-indicator { flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
   .step-item { flex: 1 1 auto; min-width: 60px; }
   .step-line { display: none; }
