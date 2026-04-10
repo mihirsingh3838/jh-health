@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const Complaint = require('../models/Complaint');
 const { protect, requireRole } = require('../middleware/auth');
-const { sendOTPEmail, sendRegistrationOTPEmail } = require('../utils/email');
+const { sendOTPEmail, sendRegistrationOTPEmail, sendComplaintSummaryEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -115,10 +115,20 @@ router.post('/', async (req, res) => {
       activityLog: [{ action: 'Complaint Registered', performedBy: userName, performedByRole: 'user', notes: `Issue(s): ${issueList.join(', ')}` }]
     });
 
+    // Send complaint summary email (best effort; do not block registration on mail errors)
+    let summaryEmailSent = true;
+    try {
+      await sendComplaintSummaryEmail(normalizedEmail, complaint);
+    } catch (emailErr) {
+      summaryEmailSent = false;
+      console.error('Complaint summary email failed:', emailErr);
+    }
+
     res.status(201).json({
       message: 'Complaint registered successfully',
       ticketId: complaint.ticketId,
-      complaintId: complaint._id
+      complaintId: complaint._id,
+      summaryEmailSent
     });
   } catch (err) {
     res.status(400).json({ message: 'Error submitting complaint', error: err.message });

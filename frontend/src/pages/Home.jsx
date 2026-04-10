@@ -1,9 +1,10 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import { getDistricts, getFacilityTypes, getFacilities, sendEmailOTP, verifyEmailOTP, submitComplaint, uploadComplaintImages } from '../api';
 import Navbar from '../components/Navbar';
 import HomeHeroBanner from '../components/HomeHeroBanner';
 import PublicFooter from '../components/PublicFooter';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const ISSUES = [
   { id: 'No Internet Connectivity', icon: '🔌', title: 'No Internet Connectivity', desc: 'Cannot access the internet at all' },
@@ -18,6 +19,79 @@ const ISSUES = [
 ];
 
 const STEP_LABELS = ['Facility', 'Details', 'Issue', 'Confirm'];
+const COMPLAINT_DRAFT_KEY = 'complaintFormDraftV1';
+const MAX_IMAGE_UPLOAD_BYTES = 20 * 1024; // 20KB
+const INITIAL_FORM = {
+  userName: '',
+  mobile: '',
+  email: '',
+  district: '',
+  facilityType: '',
+  facilityCode: '',
+  facilityName: '',
+  issueCategory: [],
+  issueDescription: '',
+  attachmentUrls: [],
+};
+
+const loadImageFromFile = (file) =>
+  new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Unable to read image.'));
+    };
+    img.src = url;
+  });
+
+const canvasToBlob = (canvas, type, quality) =>
+  new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) return reject(new Error('Compression failed.'));
+      resolve(blob);
+    }, type, quality);
+  });
+
+async function compressImageToLimit(file, maxBytes = MAX_IMAGE_UPLOAD_BYTES) {
+  if (file.size <= maxBytes) return file;
+  const img = await loadImageFromFile(file);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas not supported.');
+
+  let width = img.naturalWidth || img.width;
+  let height = img.naturalHeight || img.height;
+
+  for (let scaleAttempt = 0; scaleAttempt < 7; scaleAttempt += 1) {
+    let quality = 0.86;
+    canvas.width = Math.max(120, Math.round(width));
+    canvas.height = Math.max(120, Math.round(height));
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    for (let qualityAttempt = 0; qualityAttempt < 8; qualityAttempt += 1) {
+      const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+      if (blob.size <= maxBytes) {
+        const baseName = (file.name || 'attachment').replace(/\.[^.]+$/, '');
+        return new File([blob], `${baseName}.jpg`, {
+          type: 'image/jpeg',
+          lastModified: Date.now(),
+        });
+      }
+      quality = Math.max(0.28, quality - 0.09);
+    }
+
+    width *= 0.84;
+    height *= 0.84;
+  }
+
+  throw new Error('Image could not be compressed below 20KB.');
+}
 
 function ReportWifiBadge({ variant }) {
   return (
@@ -63,8 +137,25 @@ function StepIndicator({ current }) {
 }
 
 export default function Home() {
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ userName: '', mobile: '', email: '', district: '', facilityType: '', facilityCode: '', facilityName: '', issueCategory: [], issueDescription: '', attachmentUrls: [] });
+  const draftRef = useRef(null);
+  if (draftRef.current === null) {
+    try {
+      draftRef.current = JSON.parse(localStorage.getItem(COMPLAINT_DRAFT_KEY) || 'null');
+    } catch {
+      draftRef.current = null;
+    }
+  }
+  const draft = draftRef.current;
+  const [step, setStep] = useState(() => Number.isInteger(draft?.step) ? Math.min(Math.max(draft.step, 0), 3) : 0);
+  const [form, setForm] = useState(() => {
+    const saved = draft?.form || {};
+    return {
+      ...INITIAL_FORM,
+      ...saved,
+      issueCategory: Array.isArray(saved.issueCategory) ? saved.issueCategory : [],
+      attachmentUrls: Array.isArray(saved.attachmentUrls) ? saved.attachmentUrls : [],
+    };
+  });
   const [errors, setErrors] = useState({});
   const [districts, setDistricts] = useState([]);
   const [facilityTypes, setFacilityTypes] = useState([]);
@@ -72,7 +163,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(null);
   const [facilityError, setFacilityError] = useState('');
-  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(Boolean(draft?.emailVerified));
   const [otpSent, setOtpSent] = useState(false);
   const [otpInput, setOtpInput] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
@@ -80,6 +171,8 @@ export default function Home() {
   const [imageUploading, setImageUploading] = useState(false);
   const [imageError, setImageError] = useState('');
   const navigate = useNavigate();
+  const prevDistrictRef = useRef('');
+  const prevFacilityTypeRef = useRef('');
 
   useEffect(() => {
     setFacilityError('');
@@ -91,15 +184,23 @@ export default function Home() {
       });
   }, []);
   useEffect(() => {
+    prevDistrictRef.current = form.district || '';
+    prevFacilityTypeRef.current = form.facilityType || '';
+  }, []);
+  useEffect(() => {
     if (form.district) {
       setFacilityError('');
       getFacilityTypes(form.district)
         .then(r => setFacilityTypes(r.data || []))
         .catch(() => setFacilityTypes([]));
-      setForm(f => ({ ...f, facilityType: '', facilityCode: '', facilityName: '' }));
-      setFacilities([]);
+      if (prevDistrictRef.current && prevDistrictRef.current !== form.district) {
+        setForm(f => ({ ...f, facilityType: '', facilityCode: '', facilityName: '' }));
+        setFacilities([]);
+      }
+      prevDistrictRef.current = form.district;
     } else {
       setFacilityTypes([]);
+      prevDistrictRef.current = '';
     }
   }, [form.district]);
   useEffect(() => {
@@ -107,11 +208,19 @@ export default function Home() {
       getFacilities(form.district, form.facilityType)
         .then(r => setFacilities(r.data || []))
         .catch(() => setFacilities([]));
-      setForm(f => ({ ...f, facilityCode: '', facilityName: '' }));
+      if (prevFacilityTypeRef.current && prevFacilityTypeRef.current !== form.facilityType) {
+        setForm(f => ({ ...f, facilityCode: '', facilityName: '' }));
+      }
+      prevFacilityTypeRef.current = form.facilityType;
     } else {
       setFacilities([]);
+      prevFacilityTypeRef.current = '';
     }
   }, [form.district, form.facilityType]);
+  useEffect(() => {
+    const payload = { step, form, emailVerified };
+    localStorage.setItem(COMPLAINT_DRAFT_KEY, JSON.stringify(payload));
+  }, [step, form, emailVerified]);
 
   const set = (k, v) => {
     setForm(f => ({ ...f, [k]: v }));
@@ -160,10 +269,24 @@ export default function Home() {
     if (valid !== false) setStep(s => s + 1);
   };
   const back = () => setStep(s => s - 1);
+  const resetForm = () => {
+    setStep(0);
+    setForm(INITIAL_FORM);
+    setErrors({});
+    setFacilityError('');
+    setEmailVerified(false);
+    setOtpSent(false);
+    setOtpInput('');
+    setOtpError('');
+    setImageError('');
+    localStorage.removeItem(COMPLAINT_DRAFT_KEY);
+    toast.success('Form cleared successfully.');
+  };
 
   const handleSendOTP = async () => {
     if (!/\S+@\S+\.\S+/.test(form.email)) {
       setErrors({ email: 'Enter valid email address first' });
+      toast.error('Enter a valid email first.');
       return;
     }
     setOtpLoading(true);
@@ -173,8 +296,11 @@ export default function Home() {
       setOtpSent(true);
       setOtpInput('');
       setErrors(e => ({ ...e, email: undefined }));
+      toast.success('OTP sent to your email.');
     } catch (err) {
-      setOtpError(err.response?.data?.message || 'Failed to send OTP. Try again.');
+      const msg = err.response?.data?.message || 'Failed to send OTP. Try again.';
+      setOtpError(msg);
+      toast.error(msg);
     } finally {
       setOtpLoading(false);
     }
@@ -187,21 +313,31 @@ export default function Home() {
     const toAdd = Math.min(files.length, 2 - current);
     if (toAdd <= 0) {
       setImageError('Maximum 2 images allowed');
+      toast.error('Maximum 2 images allowed.');
       return;
     }
     const selected = files.slice(0, toAdd).filter(f => f.type.startsWith('image/'));
     if (selected.length === 0) {
       setImageError('Please select image files (JPEG, PNG, GIF, WebP)');
+      toast.error('Please select valid image files.');
       return;
     }
     setImageUploading(true);
     setImageError('');
     try {
-      const res = await uploadComplaintImages(selected);
+      const compressed = [];
+      for (const file of selected) {
+        const c = await compressImageToLimit(file);
+        compressed.push(c);
+      }
+      const res = await uploadComplaintImages(compressed);
       const urls = res.data?.urls || [];
       setForm(f => ({ ...f, attachmentUrls: [...(f.attachmentUrls || []), ...urls].slice(0, 2) }));
+      toast.success('Image uploaded.');
     } catch (err) {
-      setImageError(err.response?.data?.message || 'Failed to upload images. Try again.');
+      const msg = err.response?.data?.message || err.message || 'Failed to upload images. Try again.';
+      setImageError(msg);
+      toast.error(msg);
     } finally {
       setImageUploading(false);
     }
@@ -216,6 +352,7 @@ export default function Home() {
   const handleVerifyOTP = async () => {
     if (otpInput.length !== 6) {
       setOtpError('Enter the 6-digit OTP');
+      toast.error('Enter a valid 6-digit OTP.');
       return;
     }
     setOtpLoading(true);
@@ -225,8 +362,11 @@ export default function Home() {
       setEmailVerified(true);
       setOtpError('');
       setErrors(e => ({ ...e, emailVerify: undefined }));
+      toast.success('Email verified successfully.');
     } catch (err) {
-      setOtpError(err.response?.data?.message || 'Invalid OTP. Try again.');
+      const msg = err.response?.data?.message || 'Invalid OTP. Try again.';
+      setOtpError(msg);
+      toast.error(msg);
     } finally {
       setOtpLoading(false);
     }
@@ -236,12 +376,16 @@ export default function Home() {
     setLoading(true);
     try {
       const res = await submitComplaint(form);
+      localStorage.removeItem(COMPLAINT_DRAFT_KEY);
       // Prefill tracking contact without exposing ticket id in URL.
       localStorage.setItem('trackEmail', (form.email || '').toLowerCase().trim());
       localStorage.setItem('trackMobile', (form.mobile || '').trim());
       setSubmitted(res.data);
+      toast.success('Complaint submitted successfully.');
     } catch (err) {
-      setErrors({ submit: err.response?.data?.message || 'Submission failed. Try again.' });
+      const msg = err.response?.data?.message || 'Submission failed. Try again.';
+      setErrors({ submit: msg });
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -267,7 +411,7 @@ export default function Home() {
               </div>
               <div className="flex gap-2 mt-3" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button className="btn btn-outline" onClick={() => navigate('/track')}>Track Status</button>
-                <button className="btn btn-primary" onClick={() => { setSubmitted(null); setStep(0); setForm({ userName:'',mobile:'',email:'',district:'',facilityType:'',facilityCode:'',facilityName:'',issueCategory:[],issueDescription:'',attachmentUrls:[] }); setEmailVerified(false); setOtpSent(false); setOtpInput(''); setOtpError(''); setImageError(''); localStorage.removeItem('trackEmail'); localStorage.removeItem('trackMobile'); }}>New Complaint</button>
+                <button className="btn btn-primary" onClick={() => { setSubmitted(null); setStep(0); setForm(INITIAL_FORM); setEmailVerified(false); setOtpSent(false); setOtpInput(''); setOtpError(''); setImageError(''); localStorage.removeItem(COMPLAINT_DRAFT_KEY); localStorage.removeItem('trackEmail'); localStorage.removeItem('trackMobile'); }}>New Complaint</button>
               </div>
             </div>
           </div>
@@ -561,6 +705,9 @@ export default function Home() {
               ) : (
                 <span className="complaint-back-btn" />
               )}
+              <button type="button" className="btn btn-outline" onClick={resetForm}>
+                Reset Form
+              </button>
               {step < 3 ? (
                 <button type="button" className="btn btn-primary complaint-primary-action" onClick={next}>
                   Continue

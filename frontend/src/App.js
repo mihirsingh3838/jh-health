@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import TrackTicket from './pages/TrackTicket';
@@ -41,6 +42,13 @@ export default function App() {
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 2800,
+          style: { fontSize: '0.9rem' },
+        }}
+      />
     </AuthProvider>
   );
 }
