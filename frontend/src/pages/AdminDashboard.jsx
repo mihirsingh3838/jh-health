@@ -23,6 +23,7 @@ const NAV = [
   { id: 'complaints', label: 'All Complaints', icon: '📋' },
   { id: 'engineers', label: 'Manage Engineers', icon: '👷' },
   { id: 'mapping', label: 'Facility Mapping', icon: '📡' },
+  { id: 'unmapped', label: 'Unmapped Facilities', icon: '🧭' },
   { id: 'seed', label: 'Seed Facilities', icon: '🏥' },
 ];
 
@@ -61,6 +62,9 @@ export default function AdminDashboard() {
   const [facilityTypeOptions, setFacilityTypeOptions] = useState([]);
   const [facilityOptions, setFacilityOptions] = useState([]);
   const [mappingLoading, setMappingLoading] = useState(false);
+  const [mappingPage, setMappingPage] = useState(1);
+  const [unmappedPage, setUnmappedPage] = useState(1);
+  const [allFacilities, setAllFacilities] = useState([]);
   const [mappingForm, setMappingForm] = useState({
     district: '',
     facilityType: '',
@@ -91,8 +95,9 @@ export default function AdminDashboard() {
   useEffect(() => { if (activeTab === 'complaints') loadComplaints(); }, [activeTab, filter, page]);
   useEffect(() => { if (activeTab === 'engineers') getUsers().then(r => setUsers(r.data)); }, [activeTab]);
   useEffect(() => {
-    if (activeTab === 'mapping') {
+    if (activeTab === 'mapping' || activeTab === 'unmapped') {
       getDistricts().then(r => setDistrictOptions(r.data || [])).catch(() => setDistrictOptions([]));
+      getFacilities('', '').then(r => setAllFacilities(r.data || [])).catch(() => setAllFacilities([]));
       getNotificationDirectory().then(r => {
         const doc = r.data;
         setDirectory(doc);
@@ -115,6 +120,8 @@ export default function AdminDashboard() {
     if (!mappingForm.district || !mappingForm.facilityType) return setFacilityOptions([]);
     getFacilities(mappingForm.district, mappingForm.facilityType).then(r => setFacilityOptions(r.data || [])).catch(() => setFacilityOptions([]));
   }, [mappingForm.district, mappingForm.facilityType]);
+  useEffect(() => { setMappingPage(1); }, [directory]);
+  useEffect(() => { setUnmappedPage(1); }, [directory, allFacilities]);
 
   const loadStats = () => getComplaintStats().then(r => setStats(r.data));
   const loadComplaints = useCallback(() => {
@@ -123,6 +130,14 @@ export default function AdminDashboard() {
 
   const statMap = (key) => stats?.statusStats?.find(s => s._id === key)?.count || 0;
   const fmt = (d) => d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+  const MAPPING_PAGE_SIZE = 25;
+  const mappedRows = directory?.mappings || [];
+  const mappingPages = Math.max(1, Math.ceil(mappedRows.length / MAPPING_PAGE_SIZE));
+  const visibleMappedRows = mappedRows.slice((mappingPage - 1) * MAPPING_PAGE_SIZE, mappingPage * MAPPING_PAGE_SIZE);
+  const mappedCodes = new Set(mappedRows.map(m => m.facilityCode));
+  const unmappedRows = (allFacilities || []).filter(f => !mappedCodes.has(f.facility_code));
+  const unmappedPages = Math.max(1, Math.ceil(unmappedRows.length / MAPPING_PAGE_SIZE));
+  const visibleUnmappedRows = unmappedRows.slice((unmappedPage - 1) * MAPPING_PAGE_SIZE, unmappedPage * MAPPING_PAGE_SIZE);
 
   const handleAssign = async () => {
     setLoading(true);
@@ -224,6 +239,41 @@ export default function AdminDashboard() {
     } finally {
       setMappingLoading(false);
     }
+  };
+  const editMapping = (m) => {
+    setMappingForm({
+      district: m.district || '',
+      facilityType: m.facilityType || '',
+      facilityCode: m.facilityCode || '',
+      facilityName: m.facilityName || '',
+      engineerName: m.engineer?.name || '',
+      engineerEmail: m.engineer?.email || '',
+      engineerMobile: m.engineer?.mobile || '',
+      teamLeadName: m.teamLead?.name || '',
+      teamLeadEmail: m.teamLead?.email || '',
+      teamLeadMobile: m.teamLead?.mobile || ''
+    });
+    setFacilityOptions(prev => {
+      if ((prev || []).some(f => f.facility_code === m.facilityCode)) return prev;
+      return [...(prev || []), { facility_code: m.facilityCode, facility_name: m.facilityName }];
+    });
+    setActiveTab('mapping');
+    setMsg(`✏️ Editing mapping for ${m.facilityName}`);
+  };
+  const mapFacilityNow = (facility) => {
+    setMappingForm(v => ({
+      ...v,
+      district: facility.district || '',
+      facilityType: facility.facility_type || '',
+      facilityCode: facility.facility_code || '',
+      facilityName: facility.facility_name || ''
+    }));
+    setFacilityOptions(prev => {
+      if ((prev || []).some(f => f.facility_code === facility.facility_code)) return prev;
+      return [...(prev || []), { facility_code: facility.facility_code, facility_name: facility.facility_name }];
+    });
+    setActiveTab('mapping');
+    setMsg(`🧩 Add mapping details for ${facility.facility_name}`);
   };
 
   return (
@@ -588,13 +638,14 @@ export default function AdminDashboard() {
                         <th>Engineer</th>
                         <th>Team Lead</th>
                         <th>Updated</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(directory?.mappings || []).length === 0 && (
-                        <tr><td colSpan={4}><div className="empty-state"><div className="empty-title">No mappings yet</div></div></td></tr>
+                        <tr><td colSpan={5}><div className="empty-state"><div className="empty-title">No mappings yet</div></div></td></tr>
                       )}
-                      {(directory?.mappings || []).map(m => (
+                      {visibleMappedRows.map(m => (
                         <tr key={m.facilityCode}>
                           <td>
                             <div className="font-semibold text-sm">{m.facilityName}</div>
@@ -611,11 +662,69 @@ export default function AdminDashboard() {
                             <div className="text-xs text-muted">{m.teamLead?.mobile || '-'}</div>
                           </td>
                           <td className="text-xs text-muted">{fmt(m.updatedAt)}</td>
+                          <td>
+                            <button className="btn btn-ghost btn-sm" onClick={() => editMapping(m)}>Edit</button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                {mappedRows.length > MAPPING_PAGE_SIZE && (
+                  <div className="flex justify-between items-center" style={{ padding: '12px 16px', borderTop: '1px solid var(--gray-100)' }}>
+                    <span className="text-sm text-muted">Showing {(mappingPage - 1) * MAPPING_PAGE_SIZE + 1}–{Math.min(mappingPage * MAPPING_PAGE_SIZE, mappedRows.length)} of {mappedRows.length}</span>
+                    <div className="flex gap-2">
+                      <button className="btn btn-ghost btn-sm" disabled={mappingPage === 1} onClick={() => setMappingPage(p => p - 1)}>← Prev</button>
+                      <button className="btn btn-ghost btn-sm" disabled={mappingPage >= mappingPages} onClick={() => setMappingPage(p => p + 1)}>Next →</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Unmapped Facilities */}
+          {activeTab === 'unmapped' && (
+            <div>
+              <h2 className="mb-2">Unmapped Health Facilities</h2>
+              <p className="text-muted mb-3">Facilities listed here do not have field engineer/team lead mapping yet.</p>
+              <div className="card">
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>District</th>
+                        <th>Facility Type</th>
+                        <th>Facility</th>
+                        <th>Facility Code</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {unmappedRows.length === 0 && (
+                        <tr><td colSpan={5}><div className="empty-state"><div className="empty-title">All facilities are mapped 🎉</div></div></td></tr>
+                      )}
+                      {visibleUnmappedRows.map(f => (
+                        <tr key={f.facility_code}>
+                          <td className="text-sm">{f.district}</td>
+                          <td className="text-sm">{f.facility_type}</td>
+                          <td className="text-sm font-semibold">{f.facility_name}</td>
+                          <td className="text-xs text-muted">{f.facility_code}</td>
+                          <td><button className="btn btn-ghost btn-sm" onClick={() => mapFacilityNow(f)}>Map Now</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {unmappedRows.length > MAPPING_PAGE_SIZE && (
+                  <div className="flex justify-between items-center" style={{ padding: '12px 16px', borderTop: '1px solid var(--gray-100)' }}>
+                    <span className="text-sm text-muted">Showing {(unmappedPage - 1) * MAPPING_PAGE_SIZE + 1}–{Math.min(unmappedPage * MAPPING_PAGE_SIZE, unmappedRows.length)} of {unmappedRows.length}</span>
+                    <div className="flex gap-2">
+                      <button className="btn btn-ghost btn-sm" disabled={unmappedPage === 1} onClick={() => setUnmappedPage(p => p - 1)}>← Prev</button>
+                      <button className="btn btn-ghost btn-sm" disabled={unmappedPage >= unmappedPages} onClick={() => setUnmappedPage(p => p + 1)}>Next →</button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
