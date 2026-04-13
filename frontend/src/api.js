@@ -36,6 +36,9 @@ export const getDistricts = () => API.get('/facilities/districts');
 export const getFacilityTypes = (district) => API.get(`/facilities/types?district=${district}`);
 export const getFacilities = (district, type) => API.get(`/facilities?district=${district}&type=${type}`);
 export const seedFacilities = (facilities) => API.post('/facilities/seed', { facilities });
+export const getNotificationDirectory = () => API.get('/notifications/directory');
+export const saveGlobalNotificationContacts = (data) => API.put('/notifications/globals', data);
+export const saveFacilityNotificationMapping = (facilityCode, data) => API.put(`/notifications/mappings/${facilityCode}`, data);
 
 // Complaints (public)
 export const sendEmailOTP = (email) => API.post('/complaints/send-email-otp', { email });

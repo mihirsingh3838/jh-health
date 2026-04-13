@@ -33,6 +33,7 @@ app.use('/api/complaints', require('./routes/complaints'));
 app.use('/api/facilities', require('./routes/facilities'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'OK', message: 'Complaint Portal API running' }));

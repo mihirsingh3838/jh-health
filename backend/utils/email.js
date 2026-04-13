@@ -126,4 +126,49 @@ async function sendComplaintSummaryEmail(to, complaint) {
   }
 }
 
-module.exports = { sendOTPEmail, sendRegistrationOTPEmail, sendComplaintSummaryEmail };
+async function sendComplaintAlertEmail(recipients, complaint) {
+  if (!Array.isArray(recipients) || recipients.length === 0) return;
+  const transporter = getTransporter();
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@jhhealthwifi.gov.in';
+  const issueList = Array.isArray(complaint.issueCategory)
+    ? complaint.issueCategory
+    : [complaint.issueCategory].filter(Boolean);
+  const createdAt = complaint.createdAt
+    ? new Date(complaint.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto;">
+      <h2 style="color: #0F4C81;">New Complaint Registered</h2>
+      <p>A complaint has been registered in the JH Health WiFi portal.</p>
+      <div style="background: #f0f4f8; padding: 14px 16px; border-radius: 8px; margin: 16px 0;">
+        <div style="font-size: 12px; color: #666;">Ticket ID</div>
+        <div style="font-size: 20px; font-weight: 700; color: #0F4C81;">${complaint.ticketId}</div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr><td style="padding: 6px 0; color: #666;">Complainant</td><td style="padding: 6px 0; font-weight: 600;">${complaint.userName || '-'} (${complaint.mobile || '-'})</td></tr>
+        <tr><td style="padding: 6px 0; color: #666;">Submitted On</td><td style="padding: 6px 0; font-weight: 600;">${createdAt}</td></tr>
+        <tr><td style="padding: 6px 0; color: #666;">District</td><td style="padding: 6px 0; font-weight: 600;">${complaint.district || '-'}</td></tr>
+        <tr><td style="padding: 6px 0; color: #666;">Facility</td><td style="padding: 6px 0; font-weight: 600;">${complaint.facilityName || '-'} (${complaint.facilityCode || '-'})</td></tr>
+        <tr><td style="padding: 6px 0; color: #666;">Issue(s)</td><td style="padding: 6px 0; font-weight: 600;">${issueList.join(', ') || '-'}</td></tr>
+      </table>
+      <p style="margin-top: 14px;">Please review and take required action.</p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+      <p style="color: #999; font-size: 11px;">Jharkhand Health Department · NIC</p>
+    </div>
+  `;
+
+  if (transporter) {
+    await transporter.sendMail({
+      from,
+      to: recipients.join(','),
+      subject: `New Complaint: ${complaint.ticketId} - JH Health WiFi`,
+      html
+    });
+  } else {
+    console.log('\n📧 [Email not configured] Complaint alert would be sent to:', recipients.join(', '));
+    console.log('   Ticket:', complaint.ticketId, '| Facility:', complaint.facilityName, '\n');
+  }
+}
+
+module.exports = { sendOTPEmail, sendRegistrationOTPEmail, sendComplaintSummaryEmail, sendComplaintAlertEmail };

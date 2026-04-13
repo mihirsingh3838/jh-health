@@ -1,5 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getComplaints, getComplaintStats, getEngineers, assignComplaint, updateComplaintStatus, getUsers, registerUser } from '../api';
+import {
+  getComplaints,
+  getComplaintStats,
+  getEngineers,
+  assignComplaint,
+  updateComplaintStatus,
+  getUsers,
+  registerUser,
+  getDistricts,
+  getFacilityTypes,
+  getFacilities,
+  getNotificationDirectory,
+  saveGlobalNotificationContacts,
+  saveFacilityNotificationMapping
+} from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
@@ -8,6 +22,7 @@ const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'complaints', label: 'All Complaints', icon: '📋' },
   { id: 'engineers', label: 'Manage Engineers', icon: '👷' },
+  { id: 'mapping', label: 'Facility Mapping', icon: '📡' },
   { id: 'seed', label: 'Seed Facilities', icon: '🏥' },
 ];
 
@@ -41,6 +56,31 @@ export default function AdminDashboard() {
   const [seedJson, setSeedJson] = useState('');
   const [msg, setMsg] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [directory, setDirectory] = useState(null);
+  const [districtOptions, setDistrictOptions] = useState([]);
+  const [facilityTypeOptions, setFacilityTypeOptions] = useState([]);
+  const [facilityOptions, setFacilityOptions] = useState([]);
+  const [mappingLoading, setMappingLoading] = useState(false);
+  const [mappingForm, setMappingForm] = useState({
+    district: '',
+    facilityType: '',
+    facilityCode: '',
+    facilityName: '',
+    engineerName: '',
+    engineerEmail: '',
+    engineerMobile: '',
+    teamLeadName: '',
+    teamLeadEmail: '',
+    teamLeadMobile: ''
+  });
+  const [globalContacts, setGlobalContacts] = useState({
+    stateHeadName: '',
+    stateHeadEmail: '',
+    stateHeadMobile: '',
+    opsManagerName: '',
+    opsManagerEmail: '',
+    opsManagerMobile: ''
+  });
 
   useEffect(() => {
     if (!user || user.role !== 'admin') { navigate('/login'); return; }
@@ -50,6 +90,31 @@ export default function AdminDashboard() {
 
   useEffect(() => { if (activeTab === 'complaints') loadComplaints(); }, [activeTab, filter, page]);
   useEffect(() => { if (activeTab === 'engineers') getUsers().then(r => setUsers(r.data)); }, [activeTab]);
+  useEffect(() => {
+    if (activeTab === 'mapping') {
+      getDistricts().then(r => setDistrictOptions(r.data || [])).catch(() => setDistrictOptions([]));
+      getNotificationDirectory().then(r => {
+        const doc = r.data;
+        setDirectory(doc);
+        setGlobalContacts({
+          stateHeadName: doc?.stateHead?.name || '',
+          stateHeadEmail: doc?.stateHead?.email || '',
+          stateHeadMobile: doc?.stateHead?.mobile || '',
+          opsManagerName: doc?.opsManager?.name || '',
+          opsManagerEmail: doc?.opsManager?.email || '',
+          opsManagerMobile: doc?.opsManager?.mobile || ''
+        });
+      });
+    }
+  }, [activeTab]);
+  useEffect(() => {
+    if (!mappingForm.district) return setFacilityTypeOptions([]);
+    getFacilityTypes(mappingForm.district).then(r => setFacilityTypeOptions(r.data || [])).catch(() => setFacilityTypeOptions([]));
+  }, [mappingForm.district]);
+  useEffect(() => {
+    if (!mappingForm.district || !mappingForm.facilityType) return setFacilityOptions([]);
+    getFacilities(mappingForm.district, mappingForm.facilityType).then(r => setFacilityOptions(r.data || [])).catch(() => setFacilityOptions([]));
+  }, [mappingForm.district, mappingForm.facilityType]);
 
   const loadStats = () => getComplaintStats().then(r => setStats(r.data));
   const loadComplaints = useCallback(() => {
@@ -108,6 +173,56 @@ export default function AdminDashboard() {
     } catch(e) {
       const err = e.response?.data?.error || e.response?.data?.message || e.message;
       setMsg('❌ Invalid JSON or seed failed: ' + err);
+    }
+  };
+  const handleSaveGlobalContacts = async () => {
+    setMappingLoading(true);
+    try {
+      const res = await saveGlobalNotificationContacts({
+        stateHead: {
+          name: globalContacts.stateHeadName,
+          email: globalContacts.stateHeadEmail,
+          mobile: globalContacts.stateHeadMobile
+        },
+        opsManager: {
+          name: globalContacts.opsManagerName,
+          email: globalContacts.opsManagerEmail,
+          mobile: globalContacts.opsManagerMobile
+        }
+      });
+      setDirectory(res.data.directory);
+      setMsg('✅ Global contacts saved successfully.');
+    } catch (e) {
+      setMsg('❌ Failed to save global contacts: ' + (e.response?.data?.message || e.message));
+    } finally {
+      setMappingLoading(false);
+    }
+  };
+  const handleSaveFacilityMapping = async () => {
+    if (!mappingForm.facilityCode) return setMsg('❌ Please select a health facility.');
+    setMappingLoading(true);
+    try {
+      const res = await saveFacilityNotificationMapping(mappingForm.facilityCode, {
+        district: mappingForm.district,
+        facilityType: mappingForm.facilityType,
+        facilityName: mappingForm.facilityName,
+        engineer: {
+          name: mappingForm.engineerName,
+          email: mappingForm.engineerEmail,
+          mobile: mappingForm.engineerMobile
+        },
+        teamLead: {
+          name: mappingForm.teamLeadName,
+          email: mappingForm.teamLeadEmail,
+          mobile: mappingForm.teamLeadMobile
+        }
+      });
+      setDirectory(res.data.directory);
+      setMsg('✅ Facility mapping saved successfully.');
+    } catch (e) {
+      setMsg('❌ Failed to save facility mapping: ' + (e.response?.data?.message || e.message));
+    } finally {
+      setMappingLoading(false);
     }
   };
 
@@ -354,6 +469,152 @@ export default function AdminDashboard() {
                   </div>
                   <button className="btn btn-primary" onClick={handleSeed}>Upload Facilities</button>
                   {msg && <div className="alert alert-info mt-2">{msg}</div>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Facility Notification Mapping */}
+          {activeTab === 'mapping' && (
+            <div>
+              <h2 className="mb-2">Facility Notification Mapping</h2>
+              <p className="text-muted mb-3">
+                Map each health facility to its field engineer and team lead. State head and ops manager receive every complaint.
+              </p>
+
+              <div className="card mb-3">
+                <div className="card-header"><span className="card-title">Always-notified Contacts</span></div>
+                <div className="card-body">
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label className="form-label">State Head Name</label>
+                      <input className="form-control" value={globalContacts.stateHeadName} onChange={e => setGlobalContacts(v => ({ ...v, stateHeadName: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">State Head Email</label>
+                      <input className="form-control" type="email" value={globalContacts.stateHeadEmail} onChange={e => setGlobalContacts(v => ({ ...v, stateHeadEmail: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">State Head Mobile</label>
+                      <input className="form-control" value={globalContacts.stateHeadMobile} onChange={e => setGlobalContacts(v => ({ ...v, stateHeadMobile: e.target.value }))} />
+                    </div>
+                    <div />
+                    <div className="form-group">
+                      <label className="form-label">Ops Manager Name</label>
+                      <input className="form-control" value={globalContacts.opsManagerName} onChange={e => setGlobalContacts(v => ({ ...v, opsManagerName: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Ops Manager Email</label>
+                      <input className="form-control" type="email" value={globalContacts.opsManagerEmail} onChange={e => setGlobalContacts(v => ({ ...v, opsManagerEmail: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Ops Manager Mobile</label>
+                      <input className="form-control" value={globalContacts.opsManagerMobile} onChange={e => setGlobalContacts(v => ({ ...v, opsManagerMobile: e.target.value }))} />
+                    </div>
+                  </div>
+                  <button className="btn btn-primary mt-2" onClick={handleSaveGlobalContacts} disabled={mappingLoading}>
+                    {mappingLoading ? 'Saving...' : 'Save Global Contacts'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="card mb-3">
+                <div className="card-header"><span className="card-title">Map Facility to Engineer + Team Lead</span></div>
+                <div className="card-body">
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label className="form-label">District</label>
+                      <select className="form-control" value={mappingForm.district} onChange={e => setMappingForm(v => ({ ...v, district: e.target.value, facilityType: '', facilityCode: '', facilityName: '' }))}>
+                        <option value="">Select district</option>
+                        {districtOptions.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Facility Type</label>
+                      <select className="form-control" value={mappingForm.facilityType} onChange={e => setMappingForm(v => ({ ...v, facilityType: e.target.value, facilityCode: '', facilityName: '' }))} disabled={!mappingForm.district}>
+                        <option value="">Select type</option>
+                        {facilityTypeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Health Facility</label>
+                      <select className="form-control" value={mappingForm.facilityCode} onChange={e => {
+                        const f = facilityOptions.find(x => x.facility_code === e.target.value);
+                        setMappingForm(v => ({ ...v, facilityCode: e.target.value, facilityName: f?.facility_name || '' }));
+                      }} disabled={!mappingForm.facilityType}>
+                        <option value="">Select facility</option>
+                        {facilityOptions.map(f => <option key={f.facility_code} value={f.facility_code}>{f.facility_name}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Field Engineer Name</label>
+                      <input className="form-control" value={mappingForm.engineerName} onChange={e => setMappingForm(v => ({ ...v, engineerName: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Field Engineer Email</label>
+                      <input className="form-control" type="email" value={mappingForm.engineerEmail} onChange={e => setMappingForm(v => ({ ...v, engineerEmail: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Field Engineer Mobile</label>
+                      <input className="form-control" value={mappingForm.engineerMobile} onChange={e => setMappingForm(v => ({ ...v, engineerMobile: e.target.value }))} />
+                    </div>
+                    <div />
+                    <div className="form-group">
+                      <label className="form-label">Team Lead Name</label>
+                      <input className="form-control" value={mappingForm.teamLeadName} onChange={e => setMappingForm(v => ({ ...v, teamLeadName: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Team Lead Email</label>
+                      <input className="form-control" type="email" value={mappingForm.teamLeadEmail} onChange={e => setMappingForm(v => ({ ...v, teamLeadEmail: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Team Lead Mobile</label>
+                      <input className="form-control" value={mappingForm.teamLeadMobile} onChange={e => setMappingForm(v => ({ ...v, teamLeadMobile: e.target.value }))} />
+                    </div>
+                  </div>
+                  <button className="btn btn-primary mt-2" onClick={handleSaveFacilityMapping} disabled={mappingLoading || !mappingForm.facilityCode}>
+                    {mappingLoading ? 'Saving...' : 'Save Facility Mapping'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-header"><span className="card-title">Current Mappings</span></div>
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Facility</th>
+                        <th>Engineer</th>
+                        <th>Team Lead</th>
+                        <th>Updated</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(directory?.mappings || []).length === 0 && (
+                        <tr><td colSpan={4}><div className="empty-state"><div className="empty-title">No mappings yet</div></div></td></tr>
+                      )}
+                      {(directory?.mappings || []).map(m => (
+                        <tr key={m.facilityCode}>
+                          <td>
+                            <div className="font-semibold text-sm">{m.facilityName}</div>
+                            <div className="text-xs text-muted">{m.district} · {m.facilityType} · {m.facilityCode}</div>
+                          </td>
+                          <td className="text-sm">
+                            <div>{m.engineer?.name || '-'}</div>
+                            <div className="text-xs text-muted">{m.engineer?.email || '-'}</div>
+                            <div className="text-xs text-muted">{m.engineer?.mobile || '-'}</div>
+                          </td>
+                          <td className="text-sm">
+                            <div>{m.teamLead?.name || '-'}</div>
+                            <div className="text-xs text-muted">{m.teamLead?.email || '-'}</div>
+                            <div className="text-xs text-muted">{m.teamLead?.mobile || '-'}</div>
+                          </td>
+                          <td className="text-xs text-muted">{fmt(m.updatedAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

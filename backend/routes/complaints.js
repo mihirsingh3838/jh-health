@@ -1,8 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const Complaint = require('../models/Complaint');
+const NotificationDirectory = require('../models/NotificationDirectory');
 const { protect, requireRole } = require('../middleware/auth');
-const { sendOTPEmail, sendRegistrationOTPEmail, sendComplaintSummaryEmail } = require('../utils/email');
+const { sendOTPEmail, sendRegistrationOTPEmail, sendComplaintSummaryEmail, sendComplaintAlertEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -124,11 +125,36 @@ router.post('/', async (req, res) => {
       console.error('Complaint summary email failed:', emailErr);
     }
 
+    // Notify mapped field engineer/team lead + always-notified contacts (best effort)
+    let stakeholderEmailSent = true;
+    try {
+      const directory = await NotificationDirectory.findOne({ key: 'default' });
+      const mapping = directory?.mappings?.find(m => m.facilityCode === complaint.facilityCode);
+      const recipientSet = new Set();
+      const addRecipient = (email) => {
+        const normalized = String(email || '').toLowerCase().trim();
+        if (!normalized) return;
+        if (!/\S+@\S+\.\S+/.test(normalized)) return;
+        if (normalized === normalizedEmail) return; // user already gets summary email
+        recipientSet.add(normalized);
+      };
+      addRecipient(mapping?.engineer?.email);
+      addRecipient(mapping?.teamLead?.email);
+      addRecipient(directory?.stateHead?.email);
+      addRecipient(directory?.opsManager?.email);
+      const recipients = [...recipientSet];
+      if (recipients.length) await sendComplaintAlertEmail(recipients, complaint);
+    } catch (emailErr) {
+      stakeholderEmailSent = false;
+      console.error('Stakeholder alert email failed:', emailErr);
+    }
+
     res.status(201).json({
       message: 'Complaint registered successfully',
       ticketId: complaint.ticketId,
       complaintId: complaint._id,
-      summaryEmailSent
+      summaryEmailSent,
+      stakeholderEmailSent
     });
   } catch (err) {
     res.status(400).json({ message: 'Error submitting complaint', error: err.message });
