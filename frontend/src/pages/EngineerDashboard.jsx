@@ -75,7 +75,7 @@ export default function EngineerDashboard() {
             <img src="/logos/abdm.png" alt="ABDM" className="navbar-logo-img" />
           </div>
           <div className="navbar-brand-center">
-            <span className="navbar-title">डिजिटल स्वास्थ्य सेतु</span>
+            <span className="navbar-title">डिजिटल संचार साथी</span>
             <span className="navbar-subtitle">स्वास्थ्य और संचार, हर कदम आपके साथ</span>
           </div>
           <div className="navbar-logo-slot navbar-logo-slot--right">
